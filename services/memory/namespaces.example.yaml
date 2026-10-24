@@ -1,0 +1,37 @@
+# services/memory/namespaces.yaml - shared vs private memory contexts
+# Design: Zero-Limit-Local-AI-Server-Architecture.pdf, Chapter 14 (v1.5).
+# Principals come from A1 gateway keys; the group comes from the WebUI
+# account system (Chapter 4). Checked into git ENCRYPTED via sops and
+# rendered by sops-nix at activation - do not commit this file in plaintext.
+#
+# Access model is deliberately TWO-LEVEL (private | family). Finer grain
+# (per-entry ACLs, circles, read-only guests) is refused by design - see
+# Chapter 14, gate question G6.
+namespaces:
+  - prefix: "viking://users/{principal}/"
+    acl: owner                    # private by construction
+  - prefix: "viking://family/"
+    acl: group:household          # all members: read + write, attributed
+    delete: admin                 # guardian only; soft-delete to trash/
+                                  # (30-day purge) for everyone else
+
+defaults:
+  # Load-bearing policy: READ shared, WRITE private. Every session benefits
+  # from family context; nothing private leaks by habit. Members override
+  # per action ("remember this for the family") -> copy-with-attribution,
+  # never a move.
+  read:
+    - "users/{principal}"
+    - "family"
+  write: "users/{principal}"
+
+# Every write to family/ is stamped author + device + timestamp and
+# appended here. Automated agents (digest job, fan-out workers) may write
+# to family/ only through the confirmation gate - see Chapter 14.
+audit:
+  log: "viking://system/audit/log.jsonl"   # append-only
+
+# TODO: render {principal} from the authenticated A1 key at the adapter;
+# TODO: add trash/ retention sweeper (30 days) to the nightly maintenance;
+# TODO: pin shared memory to the primary node - replication is deferred
+# until a second node (Chapter 12) makes it a real topic.

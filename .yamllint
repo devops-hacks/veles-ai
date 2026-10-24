@@ -1,0 +1,7 @@
+# Pragmatic rules: infra YAML has long comment lines and `on:` workflow keys.
+extends: default
+rules:
+  line-length: {max: 120}
+  truthy: disable
+  document-start: disable
+  comments-indentation: disable

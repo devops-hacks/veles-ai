@@ -1,0 +1,21 @@
+# clients/vscode/continue.config.yaml
+# Copy to %USERPROFILE%\.continue\config.yaml on the Windows laptop.
+# TODO: fill <tailnet>; API key = your A1 "operator" consumer key.
+name: local-ai-config
+version: 1.0.0
+models:
+  - name: qwen3-coder-30b-a3b        # chat / plan (fan-out-aware MoE)
+    provider: openai
+    model: qwen3-coder-30b-a3b
+    apiBase: http://mac.<tailnet>.ts.net:4002/v1
+    apiKey: <A1-operator-key>
+    roles: [chat, edit, apply]
+  - name: qwen2.5-coder-1.5b         # autocomplete (isolated fast tier)
+    provider: openai
+    model: qwen2.5-coder-1.5b
+    apiBase: http://mac.<tailnet>.ts.net:4003/v1   # isolated instance port
+    apiKey: <A1-operator-key>
+    roles: [autocomplete]
+    autocompleteOptions:
+      debounceDelay: 300
+      maxPromptTokens: 1024

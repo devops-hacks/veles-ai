@@ -1,0 +1,15 @@
+// clients/vscode/settings.json - workspace settings for the repo
+// Copy relevant blocks into your Remote-SSH session on the Mac.
+{
+  // Claude Code / Cline work in Plan-on-cloud, Act-local mode (Ch. 7)
+  "cline.provider": "openai-compatible",
+  // TODO: tailnet name; key = the "agents" A1 consumer key (sops-issued)
+  "cline.openaiCompatible.baseUrl": "http://mac.<tailnet>.ts.net:4002/v1",
+  "cline.enablePlanActSplit": true,
+  // Keep agent workspaces OUT of the inference host (A5 boundary)
+  "cline.workspaceRoot": "~/projects",
+  "files.watcherExclude": {
+    "**/models/**": true,
+    "**/.git/**": true
+  }
+}
