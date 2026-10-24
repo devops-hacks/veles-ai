@@ -1,0 +1,22 @@
+# services/compose/gateway.yml - stateless web tier (Ch. 4)
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:<pinned-digest>   # TODO: pin digest
+    restart: unless-stopped
+    environment:
+      OPENAI_API_BASE_URL: http://host.docker.internal:4002/v1
+      # A1: per-consumer keys - WebUI uses the "family" key, Cline "agents", etc.
+      OPENAI_API_KEY: "@sopsKey@family@"
+      # Multi-user (roadmap): enable accounts when A1/A2 land
+      # ENABLE_LOGIN_FORM: "true"
+    ports:
+      - "127.0.0.1:3000:8080"
+    volumes:
+      - /Volumes/ai-state/open-webui:/app/backend/data
+
+  # Roadmap: Deep research (adopt via tool, gated by A4 egress ledger)
+  # searxng:
+  #   image: searxng/searxng:<pinned-digest>
+  #   restart: unless-stopped
+  #   # egress: allowlisted, logged, revocable from the flake - A4
+  #   volumes: [ "/Volumes/ai-state/searxng:/etc/searxng" ]

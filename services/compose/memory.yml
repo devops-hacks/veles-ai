@@ -1,0 +1,23 @@
+# services/compose/memory.yml - persistent memory tier (stateful, Ch. 3)
+# NOTE: embeddings + VLM stay ON-DEVICE via the gateway; nothing here egresses.
+services:
+  openviking:
+    image: ghcr.io/volcengine/openviking:<pinned-digest>   # TODO: pin digest
+    restart: unless-stopped
+    environment:
+      EMBEDDING_BASE_URL: http://host.docker.internal:4002/v1
+      EMBEDDING_MODEL: bge-m3
+      VLM_BASE_URL: http://host.docker.internal:4002/v1
+      VLM_MODEL: qwen3-vl-8b
+    volumes:
+      - /Volumes/ai-state/openviking:/data
+
+  memory-mcp:
+    build: ../adapters/memory-mcp          # Layer-3 adapter, MCP over SSE
+    restart: unless-stopped
+    depends_on: [openviking]
+    environment:
+      OPENVIKING_URL: http://openviking:8080
+      # A2 amendment: adapter API takes user_id from commit one;
+      # single household namespace is the default until multi-user lands.
+      DEFAULT_NAMESPACE: household

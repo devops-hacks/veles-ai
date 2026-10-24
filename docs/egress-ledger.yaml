@@ -1,0 +1,27 @@
+# docs/egress-ledger.yaml - amendment A4: the complete outbound list.
+# Constitutional rule: a feature that needs egress adds a row HERE before
+# it adds traffic. The quarterly security review (PDF Ch. 15.5) diffs
+# actual traffic (Prometheus) against this ledger. No undeclared channel
+# is permitted - that is the "no back door" guarantee, made checkable.
+egress:
+  - name: tailscale-control        # coordination plane + DERP relays
+    sees: connection metadata only # payloads are end-to-end encrypted
+    revoke: n/a - this is the network itself
+  - name: serve-certificates       # ts.net TLS certificate issuance
+    sees: domain names
+    revoke: local-CA fallback (A6)
+  - name: model-sync               # nightly HF pulls, pinned repo+rev+sha256
+    sees: public model files
+    revoke: stop the timer; resident models keep serving
+  - name: image-registries         # compose pull, digest-pinned images
+    sees: public container images
+    revoke: pull manually at upgrade time
+  - name: git-remote               # private GitHub repo over SSH
+    sees: declarative config (no plaintext secrets)
+    revoke: n/a - operational requirement
+  - name: claude-plan              # Claude Code Plan mode, cloud LLM (Ch. 7)
+    sees: planning context, explicitly consented
+    revoke: point Plan at a local model
+
+# TODO: wire an alert when an outbound destination outside this list is
+# observed at the gateway (Phase 2 monitoring item, PDF Ch. 15.5).

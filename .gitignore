@@ -1,0 +1,23 @@
+# local-ai-server - git hygiene
+# model weights NEVER enter git (synced from models/models.toml instead)
+/Volumes/
+models/*.gguf
+models/**/*.gguf
+*.gguf
+
+# secrets: only sops-encrypted files are allowed; plaintext never
+secrets/*.dec.*
+*.dec.yaml
+.env
+!.sops.yaml
+
+# state & caches
+*.log
+__pycache__/
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+.direnv/
+result/
+.result*

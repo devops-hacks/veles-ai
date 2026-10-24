@@ -1,0 +1,24 @@
+# models/models.toml - pinned GGUF manifest (the source of truth)
+# sync-models.sh consumes this: download -> verify -> generate swap config.
+# Rules: pin repo + revision + file + sha256; name maps to llama-swap model id.
+
+[[model]]
+name = "qwen3-coder-30b-a3b"        # fan-out coder (MoE, Ch. 11)
+repo = "Qwen/Qwen3-Coder-30B-A3B-Instruct-GGUF"
+rev  = "TODO-pin-commit-or-tag"
+file = "Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"
+sha256 = "TODO-sha256"
+[model.swap]
+cmd = "llama-server -m /Volumes/ai-models/gguf/qwen3-coder-30b-a3b.gguf -ngl 99 -fa on -ctk q8_0 -ctv q8_0 -c 131072 -np 8 --cont-batching --cache-reuse 256 -b 2048 -ub 1024 --port ${PORT}"
+
+[[model]]
+name = "qwen2.5-coder-1.5b"          # autocomplete tier (isolated server)
+repo = "Qwen/Qwen2.5-Coder-1.5B-GGUF"
+rev  = "TODO-pin-commit-or-tag"
+file = "qwen2.5-coder-1.5b-q8_0.gguf"
+sha256 = "TODO-sha256"
+[model.swap]
+cmd = "llama-server -m /Volumes/ai-models/gguf/qwen2.5-coder-1.5b-q8_0.gguf -ngl 99 -c 8192 --port ${PORT}"
+# NOTE: isolated instance OUTSIDE the swap matrix (Ch. 11, mitigation 5)
+
+# TODO(add): vision tier (qwen3-vl-8b), family chat tier, embeddings (bge-m3)
