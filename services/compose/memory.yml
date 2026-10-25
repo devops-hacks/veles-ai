@@ -2,7 +2,7 @@
 # NOTE: embeddings + VLM stay ON-DEVICE via the gateway; nothing here egresses.
 services:
   openviking:
-    image: ghcr.io/volcengine/openviking:<pinned-digest>   # TODO: pin digest
+    image: ghcr.io/volcengine/openviking:v0.4.5@sha256:b96c9621888b7162bd00646bf195dcb8bb7f9a5774025f347063321942451cb1
     restart: unless-stopped
     environment:
       EMBEDDING_BASE_URL: http://host.docker.internal:4002/v1
@@ -12,12 +12,15 @@ services:
     volumes:
       - /Volumes/ai-state/openviking:/data
 
-  memory-mcp:
-    build: ../adapters/memory-mcp          # Layer-3 adapter, MCP over SSE
-    restart: unless-stopped
-    depends_on: [openviking]
-    environment:
-      OPENVIKING_URL: http://openviking:8080
-      # A2 amendment: adapter API takes user_id from commit one;
-      # single household namespace is the default until multi-user lands.
-      DEFAULT_NAMESPACE: household
+  # memory-mcp: lands with A2 adapter (PR 2) - the build context
+  # services/adapters/memory-mcp does not exist yet, and a missing build
+  # context must not ship under a green gate.
+  # memory-mcp:
+  #   build: ../adapters/memory-mcp        # Layer-3 adapter, MCP over SSE
+  #   restart: unless-stopped
+  #   depends_on: [openviking]
+  #   environment:
+  #     OPENVIKING_URL: http://openviking:8080
+  #     # A2 amendment: adapter API takes user_id from commit one;
+  #     # single household namespace is the default until multi-user lands.
+  #     DEFAULT_NAMESPACE: household

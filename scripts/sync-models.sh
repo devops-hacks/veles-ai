@@ -8,14 +8,14 @@ MANIFEST="$(dirname "$0")/../models/models.toml"
 
 # 1) download/verify each pinned file
 #    while read -r repo rev file dest; do ... done < <(tomlq -r ...)
-echo "TODO: iterate [[model]] entries from $MANIFEST"
+echo "TODO: iterate [[models]] entries from $MANIFEST"
 #    hf download "$repo" "$file" --revision "$rev" --local-dir "$MODELS_ROOT/$dest"
 #    verify_hashes   # check sha256 against manifest; abort on mismatch
 
 # 2) prune orphans not present in the manifest (dry-run first)
 #    prune_orphans "$MODELS_ROOT"
 
-# 3) regenerate llama-swap config.yml from [[model.swap]] cmd blocks
+# 3) regenerate llama-swap config.yml from [[models.swap]] cmd blocks
 #    generate_llama_swap_config > /run/llama-swap/config.yml
 
 # 4) reload the router only if config changed
