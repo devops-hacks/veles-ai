@@ -8,7 +8,7 @@ first PR adds ``visible_roots()`` the same way.
 
 import pytest
 
-from services.memory.nsacl import AclError, check
+from services.memory.nsacl import AclError, check, visible_roots
 
 HOUSEHOLD = {"alice", "ben", "claire"}
 GUARDIAN = "alice"
@@ -89,3 +89,19 @@ class TestMalformedInput:
     def test_bad_op_raises(self):
         with pytest.raises(AclError):
             check("admin", "viking://family/status", "alice", HOUSEHOLD, GUARDIAN)
+
+
+class TestVisibleRoots:
+    """Which roots may this principal read? (Ch. 14, Listing 14-3)"""
+
+    def test_visible_roots_own_plus_family(self):
+        assert visible_roots("ben", HOUSEHOLD, GUARDIAN) == [
+            "viking://users/ben/",
+            "viking://family/",
+        ]
+
+    def test_visible_roots_unknown_principal_is_empty(self):
+        assert visible_roots("mallory", HOUSEHOLD, GUARDIAN) == []
+
+    def test_visible_roots_empty_principal_is_empty(self):
+        assert visible_roots("", HOUSEHOLD, GUARDIAN) == []

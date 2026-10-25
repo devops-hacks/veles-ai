@@ -73,3 +73,24 @@ def check(
         return True  # read-shared / write-private cohort area
 
     return False  # system/* and unknown roots: deny by default
+
+
+def visible_roots(
+    principal: str,
+    household: set[str],
+    guardian: str,
+) -> list[str]:
+    """Return the roots ``principal`` may read, in merged-recall order.
+
+    Chapter 14, Listing 14-3: the gateway merges recall across the
+    principal's own namespace plus the family area, tagging each hit with
+    its root for provenance. Unknown principals get no roots at all.
+    ``guardian`` is accepted for call-site symmetry with ``check`` - reads
+    (unlike deletes) do not depend on it.
+    """
+    if not principal or principal not in household:
+        return []
+    return [
+        f"{SCHEME}users/{principal}/",
+        f"{SCHEME}family/",
+    ]
