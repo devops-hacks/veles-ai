@@ -1,5 +1,6 @@
-# CI gates: lint + test. Authored to match docs/pr-tdd-playbook.md section 5.
-# Compose-validation and nix-eval gates are added in PR 1 (images pinned).
+# CI gates: lint + test + compose config. Authored to match
+# docs/pr-tdd-playbook.md section 5. The nix-eval gate lands in the
+# next PR (flake convergence).
 name: ci
 
 on:
@@ -44,3 +45,11 @@ jobs:
           else
             echo "no bats specs yet - skipped"
           fi
+
+  config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compose files must validate (pinned images, no missing contexts)
+        run: |
+          docker compose -f services/compose/memory.yml -f services/compose/gateway.yml config -q
