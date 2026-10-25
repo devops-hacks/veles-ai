@@ -114,30 +114,59 @@ In the browser:
 
 ## 4. Bootstrap the repo (10 min)
 
+Paste the commands **one per line, without the trailing comments** —
+interactive zsh does not treat `#` as a comment by default (§7):
+
 ```bash
 git clone git@github.com:YOU/veles-ai.git ~/veles-ai
 cd ~/veles-ai
 chmod 700 ~/veles-ai
+```
 
-# copy the starter kit in (everything, including dotfiles).
-# Option A - you already extracted the tarball to ~/Downloads/veles-ai-kit/:
+Copy the starter kit in — everything, including dotfiles. Option A: you
+already extracted the tarball to `~/Downloads/veles-ai-kit/`:
+
+```bash
 cp -R ~/Downloads/veles-ai-kit/. .
-# Option B - you kept veles-ai-kit.tar.gz: extract straight into the repo.
-# --strip-components=1 drops the wrapper folder so entries land at the
-# repo root (NOT in ~/veles-ai/veles-ai-kit/...):
-tar -xzf ~/Downloads/veles-ai-kit.tar.gz -C . --strip-components=1
+```
 
-# sanity: ls -A must show .github, .gitignore, .pre-commit-config.yaml,
-# .sops.yaml, .yamllint, README.md, clients, docs, models, nix,
-# pyproject.toml, requirements-dev.txt, scripts, services, tests
+Option B: you kept the tarball — extract straight into the repo. Use the
+newest revision (`veles-ai-kit-r2.tar.gz` or later): browsers cache
+same-named downloads, and extracting a stale copy over the repo undoes
+fixes. `--strip-components=1` drops the wrapper folder so entries land at
+the repo root, not in `~/veles-ai/veles-ai-kit/...`:
 
+```bash
+tar -xzf ~/Downloads/veles-ai-kit-r2.tar.gz -C . --strip-components=1
+```
+
+After extracting, confirm no nested wrapper directory exists:
+`ls veles-ai-kit 2>/dev/null` must print "No such file or directory".
+
+Sanity check — `ls -A` must show `.github`, `.gitignore`,
+`.pre-commit-config.yaml`, `.sops.yaml`, `.yamllint`, `README.md`, `clients`,
+`docs`, `models`, `nix`, `pyproject.toml`, `requirements-dev.txt`, `scripts`,
+`services`, `tests`.
+
+Note: `pre-commit run --all-files` below shows "(no files to check)" when
+nothing is committed yet — that is expected on a fresh clone of an empty
+repo; hooks really engage at the commit.
+
+```bash
 pre-commit install
-pre-commit run --all-files    # first run builds hook envs; auto-fixes land
+pre-commit run --all-files
 
 git add -A
 git commit -m "chore: bootstrap repo from starter kit (CI + gates + docs)"
-git push origin main          # the ONE direct push to main, ever
+git push origin main
 ```
+
+If a hook reports *"files were modified by this hook"* the commit is
+aborted by design — re-run `git add -A` and commit again; the second pass
+is green. Do **not** re-extract the tarball between the two passes: the
+hook already wrote the fix into your working tree, and a stale re-extract
+would overwrite it (this is how people get stuck in an edit loop). The
+push above is the ONE direct push to main, ever.
 
 Already created `~/veles-ai` by hand (`mkdir` + `chmod 700`)? Fine —
 `git clone` fills an existing **empty** directory. Never run `git init`
