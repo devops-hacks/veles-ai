@@ -14,6 +14,8 @@
 - [ ] Docs updated (README / docs/) when setup or behavior changed
 
 ## Security & privacy (Ch. 15 lens)
+- [ ] No PII in diff - fictional fixtures only; no real names,
+      emails, device names, or tailnet hostnames
 - [ ] No new ports, endpoints, or mounts without a note here justifying them
 - [ ] Memory touched? Namespace rules respected (A2: owner-only `users/`,
       household `family/`, guardian-only delete) + audit trail intact

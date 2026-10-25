@@ -198,7 +198,7 @@ git push -u origin feat/first-change
 `services/memory/nsacl.py` + `tests/memory/test_nsacl.py` implement the
 two-level ACL from Ch. 14 — owner-only `viking://users/{principal}/`,
 household `viking://family/`, guardian-only delete, deny-by-default for
-`viking://system/` — as a pure function with 17 tests at 100% coverage.
+`viking://system/` — as a pure function with 21 tests at 100% coverage.
 Read it first: it is the reference pattern for size (small), shape
 (red-green), and naming (test names read as specs).
 
