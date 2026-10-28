@@ -4,19 +4,20 @@
 
 [[models]]
 name = "qwen3-coder-30b-a3b"        # fan-out coder (MoE, Ch. 11)
-repo = "Qwen/Qwen3-Coder-30B-A3B-Instruct-GGUF"
-rev  = "TODO-pin-commit-or-tag"
+# unsloth publishes the official-shape GGUF; Qwen ships no official one (architect-ruled)
+repo = "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF"
+rev  = "b17cb02dd882d5b6ab62fc777ad2995f19668350"
 file = "Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"
-sha256 = "TODO-sha256"
+sha256 = "fadc3e5f8d42bf7e894a785b05082e47daee4df26680389817e2093056f088ad"
 [models.swap]
 cmd = "llama-server -m /Volumes/ai-models/gguf/qwen3-coder-30b-a3b.gguf -ngl 99 -fa on -ctk q8_0 -ctv q8_0 -c 131072 -np 8 --cont-batching --cache-reuse 256 -b 2048 -ub 1024 --port ${PORT}"
 
 [[models]]
 name = "qwen2.5-coder-1.5b"          # autocomplete tier (isolated server)
-repo = "Qwen/Qwen2.5-Coder-1.5B-GGUF"
-rev  = "TODO-pin-commit-or-tag"
-file = "qwen2.5-coder-1.5b-q8_0.gguf"
-sha256 = "TODO-sha256"
+repo = "Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF"
+rev  = "f86cb2c1fa58255f8052cc32aeede1b7482d4361"
+file = "qwen2.5-coder-1.5b-instruct-q8_0.gguf"
+sha256 = "507de59046601282ba768a9789900e6ccf60ed93ddf346730b7c68eb0715bc47"
 [models.swap]
 cmd = "llama-server -m /Volumes/ai-models/gguf/qwen2.5-coder-1.5b-q8_0.gguf -ngl 99 -c 8192 --port ${PORT}"
 # NOTE: isolated instance OUTSIDE the swap matrix (Ch. 11, mitigation 5)
