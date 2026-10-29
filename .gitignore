@@ -19,7 +19,7 @@ __pycache__/
 htmlcov/
 .venv/
 .direnv/
-result/
+result
 .result*
 
 # ruff

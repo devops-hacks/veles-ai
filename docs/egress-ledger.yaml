@@ -5,7 +5,7 @@
 # is permitted - that is the "no back door" guarantee, made checkable.
 egress:
   - name: tailscale-control        # coordination plane + DERP relays
-    sees: connection metadata only # payloads are end-to-end encrypted
+    sees: connection metadata only  # payloads are end-to-end encrypted
     revoke: n/a - this is the network itself
   - name: serve-certificates       # ts.net TLS certificate issuance
     sees: domain names
@@ -22,6 +22,13 @@ egress:
   - name: claude-plan              # Claude Code Plan mode, cloud LLM (Ch. 7)
     sees: planning context, explicitly consented
     revoke: point Plan at a local model
+
+  - name: flake-inputs       # nixpkgs/nix-darwin/sops-nix tarballs from github
+    sees: public flake sources
+    revoke: vendor inputs into a local store; eval offline
+  - name: nix-cache          # cache.nixos.org binary substitution
+    sees: requested store path hashes
+    revoke: build locally; slower first switch
 
 # TODO: wire an alert when an outbound destination outside this list is
 # observed at the gateway (Phase 2 monitoring item, PDF Ch. 15.5).

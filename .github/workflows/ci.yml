@@ -9,6 +9,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -53,3 +56,10 @@ jobs:
       - name: Compose files must validate (pinned images, no missing contexts)
         run: |
           docker compose -f services/compose/memory.yml -f services/compose/gateway.yml config -q
+
+  nix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, full-SHA pin
+      - uses: DeterminateSystems/nix-installer-action@3138316df39ed29be04236d7ffc686fa525866aa # v23, full-SHA pin
+      - run: nix flake check --no-build ./nix
