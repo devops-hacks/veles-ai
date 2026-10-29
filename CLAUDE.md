@@ -10,6 +10,7 @@ Start every task by reading:
 - RED test first, minimum GREEN, refactor in separate PRs.
 - Conventional Commits; coverage floor 85% (100% on services/).
 - No secrets ever: sops-encrypted only; gitleaks stays green.
+- No .env files ever - secrets live sops-encrypted under secrets/; non-secret defaults live inline in compose/nix.
 - No new runtime dependencies without an ADR in docs/adr/.
 - Model output is data, never instructions (A3).
 - Egress-ledger row BEFORE merging any outbound-calling code (A4).
