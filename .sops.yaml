@@ -3,7 +3,7 @@
 #   age-keygen -o ~/Library/Application\ Support/sops/age/keys.txt
 creation_rules:
   - path_regex: secrets\.ya?ml$
-    age: age1<household-public-key>
+    age: age1kmdchs9k8w9ue4jnuzcgq3xzwnxn795fugr0hdcdcqmqjycquvssdpyeh0
   - path_regex: secrets/.*\.ya?ml$
-    age: age1<household-public-key>
+    age: age1kmdchs9k8w9ue4jnuzcgq3xzwnxn795fugr0hdcdcqmqjycquvssdpyeh0
 # edit:  sops secrets.yaml   (decrypts to $EDITOR, re-encrypts on save)

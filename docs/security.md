@@ -26,6 +26,20 @@ backlog, scheduled after v1 stabilizes - never a delivery blocker.
 - [ ] (PR2) Family devices: Tailscale key expiry 90d; `tag:family` reaches
       443 only (Listing A-5). [P1, S4]
 
+## Secrets workflow
+
+- The age identity lives at `~/Library/Application Support/sops/age/keys.txt`
+  (0600, dir 0700), backed up offline. Loss of the key = loss of every secret
+  at once; the offline backup is the only recovery path.
+- `sops secrets/<file>.yaml` is the only edit path: decrypts to `$EDITOR`,
+  re-encrypts on save. Creation rules in `.sops.yaml` bind `secrets/*.yaml`
+  to the household age recipient.
+- No `.env` files, ever: secrets live sops-encrypted under `secrets/`;
+  non-secret defaults live inline in compose/nix.
+- Operator/agent boundary: the agent handles public-key wiring and ciphertext
+  (`.sops.yaml`, `sops --encrypt --in-place`); the operator alone touches the
+  private key and plaintext values. The agent never runs `sops -d`.
+
 ## Phase 2 - hardening backlog (starts after v1 stabilizes)
 
 1. Stolen-device posture: Tailscale device posture checks; 90-day rotation

@@ -32,3 +32,11 @@ repos:
     rev: v8.24.0
     hooks:
       - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: sops-header
+        name: sops-header
+        entry: python3 scripts/check_sops_header.py
+        language: system
+        files: ^secrets/.*\.ya?ml$
