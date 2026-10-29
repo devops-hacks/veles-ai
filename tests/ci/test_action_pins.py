@@ -10,8 +10,21 @@ import re
 from pathlib import Path
 
 CI = Path(__file__).resolve().parents[2] / ".github" / "workflows" / "ci.yml"
+PRECOMMIT = Path(__file__).resolve().parents[2] / ".pre-commit-config.yaml"
 
 USES_RE = re.compile(r"^\s*-? ?uses:\s*(\S+)\s*(@\S+)?\s*$", re.MULTILINE)
+
+# local hooks (repo: local) have no rev by design; everything upstream must pin
+REV_RE = re.compile(r"^\s*rev:\s*(\S+)\s*$", re.MULTILINE)
+
+
+def test_every_precommit_hook_rev_is_fully_pinned():
+    offenders = []
+    for m in REV_RE.finditer(PRECOMMIT.read_text()):
+        rev = m.group(1)
+        if not re.fullmatch(r"[0-9a-f]{40}", rev):
+            offenders.append(rev)
+    assert offenders == [], f"floating hook revs in .pre-commit-config.yaml: {offenders}"
 
 
 def test_every_action_ref_is_fully_pinned():

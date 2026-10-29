@@ -37,7 +37,10 @@ How `nix/flake.lock` moves. The lock is the system's version pin
   explicit architect note in the PR - the allowlist edit and the lock
   change travel together.
 - **Floating refs:** banned forever, repo-wide (`latest` ban, enforced
-  by `tests/ci/test_action_pins.py` for actions).
+  by `tests/ci/test_action_pins.py` for actions). Pre-commit hook revs
+  are pinned the same way and update only via reviewed PR - never a
+  blind `pre-commit autoupdate`; the same discipline as a flake lock
+  refresh.
 - **Egress:** ledger rows `flake-inputs` / `nix-cache`
   (`docs/egress-ledger.yaml`) already cover the fetch traffic. Add a row
   only if an update introduces a host not already enumerated there.
