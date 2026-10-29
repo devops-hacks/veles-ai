@@ -26,6 +26,12 @@ backlog, scheduled after v1 stabilizes - never a delivery blocker.
 - [ ] (PR2) Family devices: Tailscale key expiry 90d; `tag:family` reaches
       443 only (Listing A-5). [P1, S4]
 
+## Asset register
+
+| Asset | Purpose | Trust anchor | Failure mode |
+|---|---|---|---|
+| `scripts/bootstrap.sh` | reproducible bring-up to the converged darwin config | installer pinned by version + content sha256 in-script; HTTPS github release assets only | fail-closed: any unverified step halts; identity stays operator-handled |
+
 ## Secrets workflow
 
 - The age identity lives at `~/Library/Application Support/sops/age/keys.txt`
