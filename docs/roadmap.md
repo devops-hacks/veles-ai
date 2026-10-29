@@ -73,3 +73,17 @@ Switch is the operator's convergence event. Parked, with owners:
 - homebrew.enable + orbstack cask -> deferred, see
   `docs/adr/0004-homebrew-primaryuser-deferral.md` (primaryUser/PII
   ruling pending; no username committed).
+
+## Delivery status - 1b-ii (bootstrap script): SHIPPED
+
+`scripts/bootstrap.sh` (+ `tests/bootstrap/` guards, `docs/bootstrap.md`):
+reproducible bring-up from bare arm64 macOS to the converged config -
+pinned, content-hashed installer fetch, verified steps, fail-closed,
+operator-handled identity. The operator runs `--check` on the converged
+Mac post-merge and files the output for the record.
+
+## Bring-up gates (standing acceptance criteria)
+
+- **SR-01** gateway auth lands WITH llama-swap;
+- **SR-02** WebUI first-admin + closed signups;
+- **SR-03** loopback-only binds except the TLS terminator.

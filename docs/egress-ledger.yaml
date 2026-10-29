@@ -50,5 +50,13 @@ egress:
     sees: requested store path hashes
     revoke: build locally; slower first switch
 
+  - name: bootstrap-installer  # bootstrap-time installer fetch (1b-ii)
+    hosts:
+      - install.determinate.systems     # https/443 - documented convenience URL; declared, not used by the script
+      - github.com                       # https/443 - pinned release fetch
+      - objects.githubusercontent.com    # https/443 - release asset download
+    sees: installer binary + release metadata
+    revoke: air-gapped installer media
+
 # TODO: wire an alert when an outbound destination outside this list is
 # observed at the gateway (Phase 2 monitoring item, PDF Ch. 15.5).
