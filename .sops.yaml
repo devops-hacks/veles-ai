@@ -1,6 +1,5 @@
 # .sops.yaml - everything sensitive is age-encrypted in-repo
-# TODO: generate your age key OFFLINE first:
-#   age-keygen -o ~/Library/Application\ Support/sops/age/keys.txt
+# (age key ceremony: see docs/security.md "Secrets workflow")
 creation_rules:
   - path_regex: secrets\.ya?ml$
     age: age1kmdchs9k8w9ue4jnuzcgq3xzwnxn795fugr0hdcdcqmqjycquvssdpyeh0

@@ -1,8 +1,8 @@
 # Pragmatic rules: infra YAML has long comment lines and `on:` workflow keys.
 # secrets/*.yaml are sops ciphertext: their base64 blob lines cannot be
 # wrapped, so line-length does not apply there (the sops-header guard
-# still proves encryption, and gitleaks still scans the plaintext-
-# er, the file - for accidental raw secrets).
+# still proves encryption; gitleaks still scans the file for accidental
+# raw secrets).
 extends: default
 ignore: |
   secrets/*.yaml
