@@ -62,3 +62,14 @@ the external audit brief, 6 new). Remediation is phased: Phase 1 day-one
 baseline (under half a day, folded into PR 0-2, see
 `docs/security.md`) + Phase 2 hardening backlog after v1 stabilizes.
 Delivery timescales unchanged.
+
+## Delivery status - 1b-i (darwin flake convergence): COMPLETE
+
+Flake converged and locked (PR 9 + amend): all inputs pinned to 40-hex
+revs, guard tests live, CI eval job green, build proven on the Mac.
+Switch is the operator's convergence event. Parked, with owners:
+- launchd services (llama-swap, sync-models) -> inference phase,
+  roadmap PR 3 (Linux-ism paths to be resolved there).
+- homebrew.enable + orbstack cask -> deferred, see
+  `docs/adr/0004-homebrew-primaryuser-deferral.md` (primaryUser/PII
+  ruling pending; no username committed).

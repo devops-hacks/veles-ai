@@ -30,6 +30,7 @@
           # PARKED: homebrew/primaryUser deferred pending architect ruling on
           # PII policy + homebrew egress rows (current nix-darwin requires
           # system.primaryUser once homebrew.enable is set).
+          # Tracked: docs/adr/0004-homebrew-primaryuser-deferral.md.
           # homebrew = {
           #   enable = true;
           #   casks = [ "orbstack" ];
@@ -39,6 +40,7 @@
           # ---- router: llama-swap as a kept-alive launchd service ----
           # PARKED: wired in the inference phase (roadmap PR 3); /run/* paths
           # are Linux-isms - real macOS paths decided then.
+          # Tracked: docs/roadmap.md "Delivery status - 1b-i".
           # launchd.user.services.llama-swap = {
           #   serviceConfig = {
           #     ProgramArguments = [
@@ -55,6 +57,7 @@
           # ---- nightly GGUF sync (manifest -> disk -> swap config) ----
           # PARKED: wired in the inference phase (roadmap PR 3); /run/* paths
           # are Linux-isms - real macOS paths decided then.
+          # Tracked: docs/roadmap.md "Delivery status - 1b-i".
           # launchd.user.services.sync-models = {
           #   serviceConfig = {
           #     Program = "/run/current-system/sw/bin/sync-models";
