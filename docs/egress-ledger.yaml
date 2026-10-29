@@ -3,30 +3,50 @@
 # it adds traffic. The quarterly security review (PDF Ch. 15.5) diffs
 # actual traffic (Prometheus) against this ledger. No undeclared channel
 # is permitted - that is the "no back door" guarantee, made checkable.
+#
+# hosts: every outbound destination for the row. Entries marked TBD mean
+# the row's traffic is not yet configured in-repo; hosts land here with
+# evidence when that happens - never guessed.
 egress:
   - name: tailscale-control        # coordination plane + DERP relays
+    hosts: []  # TBD: no in-repo tailscale config exists yet; control-plane host names land with the flake module
     sees: connection metadata only  # payloads are end-to-end encrypted
     revoke: n/a - this is the network itself
   - name: serve-certificates       # ts.net TLS certificate issuance
+    hosts: []  # TBD: tailscale serve not configured in-repo yet (A6 local-CA fallback also pending)
     sees: domain names
     revoke: local-CA fallback (A6)
   - name: model-sync               # nightly HF pulls, pinned repo+rev+sha256
+    hosts:
+      - huggingface.co             # https/443 - models/models.toml repo ids; scripts/sync-models.sh `hf download`
     sees: public model files
     revoke: stop the timer; resident models keep serving
   - name: image-registries         # compose pull, digest-pinned images
+    hosts:
+      - ghcr.io                    # https/443 - services/compose/gateway.yml + memory.yml pinned digests
     sees: public container images
     revoke: pull manually at upgrade time
   - name: git-remote               # private GitHub repo over SSH
+    hosts:
+      - github.com                 # ssh/22 push-pull; https/443 in CI checkouts (.github/workflows/ci.yml)
     sees: declarative config (no plaintext secrets)
     revoke: n/a - operational requirement
   - name: claude-plan              # Claude Code Plan mode, cloud LLM (Ch. 7)
+    hosts: []  # TBD: committed clients/vscode/ configs are local-only; no cloud endpoint named in-repo yet
     sees: planning context, explicitly consented
     revoke: point Plan at a local model
 
   - name: flake-inputs       # nixpkgs/nix-darwin/sops-nix tarballs from github
+    hosts:
+      - github.com                       # https/443
+      - api.github.com                   # https/443
+      - codeload.github.com              # https/443
+      - objects.githubusercontent.com    # https/443
     sees: public flake sources
     revoke: vendor inputs into a local store; eval offline
   - name: nix-cache          # cache.nixos.org binary substitution
+    hosts:
+      - cache.nixos.org                  # https/443
     sees: requested store path hashes
     revoke: build locally; slower first switch
 
