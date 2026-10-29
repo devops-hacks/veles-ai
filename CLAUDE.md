@@ -19,5 +19,5 @@ Start every task by reading:
 ## PII policy
 - No real names, emails, device names, or tailnet hostnames in any file.
 - Tests and examples use fictional principals only (alice, ben, claire).
-- Real configuration lives in sops-encrypted files or gitignored locals.
+- Real configuration lives in sops-encrypted files only.
 - Git identity must use the GitHub noreply email.
