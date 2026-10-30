@@ -52,7 +52,6 @@ egress:
 
   - name: bootstrap-installer  # bootstrap-time installer fetch (1b-ii)
     hosts:
-      - install.determinate.systems     # https/443 - documented convenience URL; declared, not used by the script
       - github.com                       # https/443 - pinned release fetch
       - objects.githubusercontent.com    # https/443 - release asset download
     sees: installer binary + release metadata
