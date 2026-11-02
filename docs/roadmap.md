@@ -87,3 +87,17 @@ Mac post-merge and files the output for the record.
 - **SR-01** gateway auth lands WITH llama-swap;
 - **SR-02** WebUI first-admin + closed signups;
 - **SR-03** loopback-only binds except the TLS terminator.
+
+## Delivery status - PR 3 (inference core): LANDED, switch pending
+
+llama-swap (pinned v268, content-hashed) as a system LaunchDaemon on
+127.0.0.1:4002 with A1 keys sops-managed; isolated 1.5B autocomplete
+tier on 127.0.0.1:4003; generator for the router config
+(scripts/generate_swap_config.py, manifest-driven, fail-closed). Source
+guards enforce loopback binds, the service account, pins, and the
+primaryUser trap. Two build findings escalated (see
+docs/inference.md): proxy.golang.org egress for the sops-nix darwin
+build, and a UserName launchd<->users recursion at the pinned
+nix-darwin revs. Bring-up gates: **SR-01 done in code** (keys at the
+choke point, loopback binds; operator smoke pending switch), **SR-03
+done for this tier**, SR-02 remains with PR 5 (WebUI).

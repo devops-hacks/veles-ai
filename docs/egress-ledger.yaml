@@ -57,5 +57,16 @@ egress:
     sees: installer binary + release metadata
     revoke: air-gapped installer media
 
+  - name: llama-swap-binary   # nix fetchurl of the pinned release asset (nix/inference.nix)
+    hosts:
+      - github.com                       # https/443 - pinned v268 release fetch
+      - objects.githubusercontent.com    # https/443 - release asset download
+    sees: installer-style release binary + release metadata
+    revoke: build from source (Phase 2 hardening option)
+  - name: go-module-proxy     # sops-nix darwin build fetches Go modules from source
+    hosts:
+      - proxy.golang.org                 # https/443 - sops-install-secrets go-modules (no darwin substitute in nixpkgs)
+    sees: public go module archives (content-hashed by nix)
+    revoke: vendor modules; nixpkgs darwin package when one lands
 # TODO: wire an alert when an outbound destination outside this list is
 # observed at the gateway (Phase 2 monitoring item, PDF Ch. 15.5).
