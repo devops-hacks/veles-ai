@@ -71,4 +71,5 @@ jobs:
         with:
           persist-credentials: false   # no step pushes
       - uses: DeterminateSystems/nix-installer-action@3138316df39ed29be04236d7ffc686fa525866aa  # v23, full-SHA pin
-      - run: nix flake check --no-build ./nix
+      - name: Strict eval (drvPath forces full option evaluation)
+        run: nix eval --raw ./nix#darwinConfigurations.mac-ai.system.drvPath

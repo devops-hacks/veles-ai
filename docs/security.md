@@ -30,6 +30,7 @@ backlog, scheduled after v1 stabilizes - never a delivery blocker.
 
 | Asset | Purpose | Trust anchor | Failure mode |
 |---|---|---|---|
+| `llama-swap` service (nix/inference.nix) | GGUF inference router on loopback :4002 | release binary pinned by version + SRI hash; A1 keys sops-encrypted, 0400, service account `_veles` | unauthenticated calls get 401; wildcard bind is a guarded defect (source guards fail the PR) |
 | `scripts/bootstrap.sh` | reproducible bring-up to the converged darwin config | installer pinned by version + content sha256 in-script; HTTPS github release assets only | fail-closed: any unverified step halts; identity stays operator-handled |
 
 ## Secrets workflow

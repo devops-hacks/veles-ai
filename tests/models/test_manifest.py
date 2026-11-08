@@ -40,3 +40,30 @@ def test_every_model_pin_is_resolved():
         ):
             bad.append(entry["name"])
     assert bad == []
+
+
+def test_every_entry_has_dest_matching_swap_cmd():
+    """sync-models (roadmap PR 4) downloads `file`, saves as `dest`.
+
+    The swap cmd must reference dest - the local name - never the
+    upstream file name, so the two may differ freely upstream.
+    """
+    bad = []
+    for entry in tomllib.loads(MANIFEST.read_text())["models"]:
+        dest = entry.get("dest", "")
+        if not dest or dest not in entry["swap"]["cmd"]:
+            bad.append(entry["name"])
+    assert bad == []
+
+
+def test_isolated_entries_have_port_others_keep_port_macro():
+    """Isolated tiers run OUTSIDE the swap matrix on a fixed port;
+    matrix tiers get ${PORT} substituted by llama-swap per spawn."""
+    bad = []
+    for entry in tomllib.loads(MANIFEST.read_text())["models"]:
+        isolated = entry.get("isolated", False)
+        if isolated and not isinstance(entry.get("port"), int):
+            bad.append(entry["name"])
+        if not isolated and "${PORT}" not in entry["swap"]["cmd"]:
+            bad.append(entry["name"])
+    assert bad == []
