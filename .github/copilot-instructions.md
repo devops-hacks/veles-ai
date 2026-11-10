@@ -7,7 +7,9 @@ operator's machines stay stateless consumers of that truth.
 
 ## Repository map
 
-- `nix/flake.nix` — darwin host: llama-swap launchd service, sync timer (PR 1)
+- `nix/flake.nix` + `nix/inference.nix` — darwin host: llama-swap +
+  autocomplete launchd daemons (inference core, PR 3); sync timer lands
+  with PR 4
 - `services/compose/` — memory.yml (stateful), gateway.yml (stateless web)
 - `services/memory/` — namespaces.example.yaml (A2 config) + nsacl.py
   (Chapter 14 ACL decisions, fully tested)
@@ -67,7 +69,11 @@ operator's machines stay stateless consumers of that truth.
 
 - `pytest -q --cov=services --cov-report=term-missing --cov-fail-under=85`
 - `pre-commit run --all-files`
-- `darwin-rebuild build --flake .#mac-ai` (dry gate before any `switch`)
+- `nix run nix-darwin -- build --flake ./nix#mac-ai` (dry gate before
+  any `switch`; the switch is root-only - `sudo "$(command -v nix)" run
+  nix-darwin -- switch --flake ./nix#mac-ai` - and needs
+  `nix.enable = false` plus the `/run` firmlink: ADR-0005,
+  docs/inference.md findings 4-8)
 - `./scripts/sync-models.sh` (manifest → disk → swap config → reload)
 
 ## Do not

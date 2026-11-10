@@ -28,7 +28,8 @@ How `nix/flake.lock` moves. The lock is the system's version pin
 1. Revert the lock commit (a normal revert PR, or `git revert` on the
    branch for urgent cases).
 2. Re-run the switch with the restored lock. Generations remain
-   available as a second belt: `darwin-rebuild --rollback`.
+   available as a second belt:
+   `sudo "$(command -v nix)" run nix-darwin -- switch --rollback`.
 
 ## Constraints
 

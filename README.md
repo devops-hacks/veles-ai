@@ -22,8 +22,12 @@ replace `<placeholders>`; nothing here is a stub to delete.
    process + TDD rules: `docs/pr-tdd-playbook.md`.
 2. Fill `models/models.toml` with your pinned GGUF set; run `scripts/sync-models.sh`
    against a mounted `/Volumes/ai-models`.
-3. Wire `nix/flake.nix` (llama-swap launchd service + sync timer), then
-   `darwin-rebuild switch --flake .#mac-ai` (PR 1).
+3. Wire `nix/inference.nix` (imported by `nix/flake.nix`; llama-swap +
+   autocomplete launchd daemons - inference core), then converge with
+   the root-only switch:
+   `sudo "$(command -v nix)" run nix-darwin -- switch --flake ./nix#mac-ai`
+   (PR 3; prerequisites: findings 4-8 in `docs/inference.md` - the
+   asset-URL and `sourceRoot` fixes are pending push - and ADR-0005).
 4. Implement amendments A1 (per-consumer gateway keys) and A2 (memory
    namespaces) before anything depends on them (PR 2); seed
    `services/memory/namespaces.example.yaml` (Chapter 14: private |
@@ -67,7 +71,9 @@ git add -A && git commit -m "chore: bootstrap from starter kit" && git push orig
 - TDD from day one: red test → green → refactor; PR checklist + AI review
   per `docs/pr-tdd-playbook.md`; CI enforces lint + tests + coverage ≥ 85%
   (floor raised to 90% after the first month).
-- `darwin-rebuild build` (dry) before `switch`; rollback on failed health gates.
+- `nix run nix-darwin -- build` (dry) before `switch`; the switch is
+  root-only - `sudo "$(command -v nix)" run nix-darwin -- switch`
+  (ADR-0005, `docs/inference.md`); rollback on failed health gates.
 - Secrets only via sops (`.sops.yaml`); the age key never enters git.
 - Security baseline (`docs/security.md`, Phase 1) is part of PR 0-2; the
   hardening backlog starts after v1. Egress only via `docs/egress-ledger.yaml`

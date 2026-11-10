@@ -2,6 +2,10 @@
 
 - Status: accepted
 - Date: 2026-10-18
+- Amended: 2026-11-11 - the `scripts/gitops-apply.sh` named below is a
+  planned seam, not shipped; today's apply path is
+  `scripts/bootstrap.sh` plus the operator flow in docs/inference.md
+  (dry `build`, root-only `switch`, launchd smoke tests).
 
 ## Context
 A one-operator household still needs reproducibility, secrets, and a rollback

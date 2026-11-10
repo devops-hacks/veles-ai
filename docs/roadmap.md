@@ -101,3 +101,16 @@ build, and a UserName launchd<->users recursion at the pinned
 nix-darwin revs. Bring-up gates: **SR-01 done in code** (keys at the
 choke point, loopback binds; operator smoke pending switch), **SR-03
 done for this tier**, SR-02 remains with PR 5 (WebUI).
+
+**Update 2026-11-11 (dry-gate rebuild, findings 4-8 in
+docs/inference.md):** the sops/proxy.golang.org blocker did NOT
+reproduce - the full closure builds (finding 1 RESOLVED). New
+rulings: llama-swap assets drop the `v` from filenames (404 fix
+pending push), flat tarball needs `sourceRoot = "."`, activation is
+root-only with the hard Determinate check (`nix.enable = false`,
+ADR-0005), and the `/run` firmlink is a boot-time prerequisite. PR 19
+(open) carries the generator-exec fix (`python3` prefix) and the
+KeepAlive ruling (`SuccessfulExit = false`). Idempotency gap to close
+in code: `scripts/bootstrap.sh` converge still switches without sudo
+(see docs/bootstrap.md). Switch pending: operator, after PR 19 and
+the pending fix PRs land.
