@@ -25,7 +25,7 @@
 
 let
   # ---- pinned constants (change only via reviewed PR) ----
-  LLAMA_SWAP_VERSION = "v268";
+  LLAMA_SWAP_VERSION = "268";
   LLAMA_SWAP_SHA256 = "sha256-NzobtQFBgORKkaXnp6ok8boYtd/ZYid596ojS9M+7IY=";
 
   MODELS_ROOT = "/Volumes/ai-models/gguf";
@@ -36,9 +36,14 @@ let
     pname = "llama-swap";
     version = LLAMA_SWAP_VERSION;
     src = pkgs.fetchurl {
-      url = "https://github.com/mostlygeek/llama-swap/releases/download/${LLAMA_SWAP_VERSION}/llama-swap_${LLAMA_SWAP_VERSION}_darwin_arm64.tar.gz";
+      url = "https://github.com/mostlygeek/llama-swap/releases/download/v${LLAMA_SWAP_VERSION}/llama-swap_${LLAMA_SWAP_VERSION}_darwin_arm64.tar.gz";
       sha256 = LLAMA_SWAP_SHA256;
     };
+    sourceRoot = ".";
+#src = fetchurl {
+#  url = "https://github.com/mostlygeek/llama-swap/releases/download/v268/llama-swap_268_darwin_arm64.tar.gz";
+#  sha256 = "sha256-NzobtQFBgORKkaXnp6ok8boYtd/ZYid596ojS9M+7IY=";
+#};
     # source tarball carries the prebuilt darwin-arm64 binary at top level
     installPhase = ''
       install -Dm755 llama-swap $out/bin/llama-swap
