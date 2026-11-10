@@ -24,11 +24,12 @@ keep Determinate as the sole owner of the Nix installation. The switch
 runs root-only:
 
 ```bash
-sudo "$(command -v nix)" run nix-darwin -- switch --flake .#mac-ai
+sudo "$(command -v nix)" run nix-darwin -- switch --flake ./nix#mac-ai
 ```
 
 The `command -v` indirection survives sudo's PATH reset; plain
-`sudo nix` often does not.
+`sudo nix` often does not. Run from the repo root - the flake lives
+at `nix/flake.nix`.
 
 ## Consequences
 
@@ -41,7 +42,7 @@ The `command -v` indirection survives sudo's PATH reset; plain
 - Alternative rejected: migrating off Determinate to the standard
   installer to regain `nix.*` - churn (uninstall, reboot, reinstall)
   with no offsetting benefit.
-- Once the pending flake PR (`nix.enable = false;`) and the
+- Once PR 20 (`nix.enable = false;`, open as of 2026-11-11) and the
   bootstrap.sh converge PR (sudo + `/run` check - the KNOWN GAP in
   docs/bootstrap.md) land, bootstrap.sh and the flake are mutually
   consistent and a fresh bootstrap converges in one pass. Until then

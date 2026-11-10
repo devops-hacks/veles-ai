@@ -26,11 +26,11 @@ Idempotent and safe to re-run; every step detects existing state first.
    26.11: `sudo "$(command -v nix)" run nix-darwin -- switch --flake
    <repo>/nix#mac-ai`. Standing prerequisites (findings 4-8 in
    docs/inference.md): the flake module must carry
-   `nix.enable = false;` (ADR-0005) - PENDING PUSH, not yet on main;
-   until that PR lands, confirm the local checkout carries it or the
-   switch aborts with "Determinate detected" - and
-   `/etc/synthetic.conf` must carry the `/run` firmlink (verified
-   below). KNOWN GAP (2026-11-11): the script's converge step still
+   `nix.enable = false;` (ADR-0005) - carried by PR 20 (open as of
+   2026-11-11); converge only from a checkout that includes it (main
+   once PR 20 merges), or the switch aborts with "Determinate
+   detected" - and `/etc/synthetic.conf` must carry the `/run`
+   firmlink (verified below). KNOWN GAP (2026-11-11): the script's converge step still
    runs the switch WITHOUT sudo - until a reviewed code PR lands it,
    run the switch by hand with the command above. The lock is
    sacred: the script NEVER runs `nix flake update`.
@@ -63,7 +63,7 @@ firmlink as a failed bring-up. The repair is a boot-time operator act,
 never a scripted mutation:
 
 ```bash
-sudo cat -et /etc/synthetic.conf   # expect: run^Iprivate/var/run$
+sudo cat -et /etc/synthetic.conf   # expect: nix$ and run^Iprivate/var/run$
 ls /run                            # non-empty (contents of /var/run)
 ```
 

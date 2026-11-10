@@ -81,8 +81,9 @@ Deliberately **not** in CI yet:
   images carry real pinned digests (the `<pinned-digest>` placeholders
   would fail validation today);
 - `nix flake check` — add after PR 1 (eval-only on ubuntu runners; the
-  darwin activation stays a local `nix run nix-darwin -- build` dry-gate
-  per README, run from `nix/` - the switch itself is root-only,
+  darwin activation stays a local
+  `nix run nix-darwin -- build --flake ./nix#mac-ai` dry-gate per
+  README, run from the repo root - the switch itself is root-only,
   ADR-0005).
 
 ## 6. Coverage policy

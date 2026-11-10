@@ -27,7 +27,8 @@ replace `<placeholders>`; nothing here is a stub to delete.
    the root-only switch:
    `sudo "$(command -v nix)" run nix-darwin -- switch --flake ./nix#mac-ai`
    (PR 3; prerequisites: findings 4-8 in `docs/inference.md` - the
-   asset-URL and `sourceRoot` fixes are pending push - and ADR-0005).
+   asset-URL and `sourceRoot` fixes are carried by PR 20 - and
+   ADR-0005).
 4. Implement amendments A1 (per-consumer gateway keys) and A2 (memory
    namespaces) before anything depends on them (PR 2); seed
    `services/memory/namespaces.example.yaml` (Chapter 14: private |
@@ -71,9 +72,18 @@ git add -A && git commit -m "chore: bootstrap from starter kit" && git push orig
 - TDD from day one: red test → green → refactor; PR checklist + AI review
   per `docs/pr-tdd-playbook.md`; CI enforces lint + tests + coverage ≥ 85%
   (floor raised to 90% after the first month).
-- `nix run nix-darwin -- build` (dry) before `switch`; the switch is
-  root-only - `sudo "$(command -v nix)" run nix-darwin -- switch`
-  (ADR-0005, `docs/inference.md`); rollback on failed health gates.
+- `nix run nix-darwin -- build --flake ./nix#mac-ai` (dry) before the
+  `switch`; the switch is root-only -
+  `sudo "$(command -v nix)" run nix-darwin -- switch --flake ./nix#mac-ai`
+  (ADR-0005, `docs/inference.md`); rollback on failed health gates
+  (procedure: `docs/flake-updates.md`).
+- GitOps loop, idempotent by construction: the repo is the single
+  source of truth; `scripts/bootstrap.sh` converges a machine to it and
+  is safe to re-run (existing state is detected, never re-applied);
+  `nix/flake.lock` moves only via a reviewed lock-diff PR
+  (`docs/flake-updates.md`), never by script; every apply is the dry
+  `build` gate before the root-only `switch`, and the guard tests (pin
+  guards, egress ledger, lock allowlist) fail any drift.
 - Secrets only via sops (`.sops.yaml`); the age key never enters git.
 - Security baseline (`docs/security.md`, Phase 1) is part of PR 0-2; the
   hardening backlog starts after v1. Egress only via `docs/egress-ledger.yaml`

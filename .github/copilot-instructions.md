@@ -73,7 +73,7 @@ operator's machines stay stateless consumers of that truth.
   any `switch`; the switch is root-only - `sudo "$(command -v nix)" run
   nix-darwin -- switch --flake ./nix#mac-ai` - and needs
   `nix.enable = false` plus the `/run` firmlink: ADR-0005,
-  docs/inference.md findings 4-8)
+  docs/inference.md findings 7-8)
 - `./scripts/sync-models.sh` (manifest → disk → swap config → reload)
 
 ## Do not

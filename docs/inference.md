@@ -22,8 +22,7 @@ no models to load.
    blocker did not reproduce. No vendoring. The ledger row stays: a
    fresh machine may still fetch go-modules (content-hashed by nix).
    The S9 proxy gate is lifted by this resolution; the remaining
-   switch conditions are PR 19 and the pending fix PRs (roadmap
-   2026-11-11 update).
+   switch conditions are PR 19 and PR 20 (roadmap 2026-11-11 update).
 
 2. **Launchd plist recursion - ROOT CAUSE CORRECTED.** First reported
    as `UserName` <-> users-module recursion; the S15 probe + bisect
@@ -72,20 +71,23 @@ no models to load.
 4. **llama-swap release assets drop the `v` (2026-11-11, dry-gate
    rebuild).** Tags read `vNNN`; asset filenames read
    `llama-swap_NNN_darwin_arm64.tar.gz` - verified against the release
-   API from v120 through v271. The PR 18 URL templated the tag into
+   API at v120, v268, v270, and v271. The PR 18 URL templated the tag into
    the filename, so `fetchurl` 404'd (`curl: (22)`, three retries).
    The SRI hash on main was already correct - it was taken from the
-   real asset's digest. Fix (pending push): build the URL from the
-   version WITHOUT the leading `v`; hash and pin discipline unchanged.
+   real asset's digest. Fix (carried by PR 20): pin the bare
+   `LLAMA_SWAP_VERSION = "268"`, keep the tag `v${LLAMA_SWAP_VERSION}`
+   in the URL path segment, and build the filename from the version
+   WITHOUT the leading `v`; hash and pin discipline unchanged.
 
 5. **Flat release tarball (same rebuild).** The darwin-arm64 tarball
    unpacks its files at the top level - no wrapper directory - so the
    default `unpackPhase` aborts ("unpacker appears to have produced no
-   directories"). Fix (pending push): `sourceRoot = ".";` on the
+   directories"). Fix (carried by PR 20): `sourceRoot = ".";` on the
    derivation; the binary then sits at `./llama-swap` for the
    installPhase.
 
-6. **KeepAlive semantics (PR 19, open).** `KeepAlive = true` restarts a job
+6. **KeepAlive semantics (PR 19, open as of 2026-11-11).**
+   `KeepAlive = true` restarts a job
    on EVERY exit, so the autocomplete daemon's intentional clean
    exit-0 (model absent until PR 4) became an exit-loop. Ruling
    (restores the launcher's stated no-crash-loop contract):
@@ -134,12 +136,12 @@ RETIRED: any task that appears to require decryption is a STOP).
 
 ```bash
 # 0. standing prerequisites (findings 7-8): the flake must carry
-#    nix.enable = false (pending push - not yet on main); /run firmlink
+#    nix.enable = false (carried by PR 20); /run firmlink
 #    present (boot-time, finding 8)
 # 1. build (dry gate - no switch; go-module-proxy blocker RESOLVED 2026-11-11)
-cd nix && nix run nix-darwin -- build --flake .#mac-ai
+nix run nix-darwin -- build --flake ./nix#mac-ai
 # 2. switch (operator-only; root-only activation on nix-darwin 26.11 - finding 7)
-sudo "$(command -v nix)" run nix-darwin -- switch --flake .#mac-ai
+sudo "$(command -v nix)" run nix-darwin -- switch --flake ./nix#mac-ai
 # 3. control
 sudo launchctl kickstart -k system/org.nixos.llama-swap
 sudo launchctl kickstart -k system/org.nixos.llama-autocomplete
@@ -195,7 +197,7 @@ must exist as the synthetic firmlink `run -> private/var/run` before
 any switch. Idempotent check:
 
 ```bash
-sudo cat -et /etc/synthetic.conf   # must contain: run^Iprivate/var/run$
+sudo cat -et /etc/synthetic.conf   # must contain: nix$ and run^Iprivate/var/run$
 ls /run                            # non-empty (contents of /var/run)
 ```
 

@@ -56,7 +56,7 @@ autonomous agents go wide.
 ## v1.6 - Security and privacy audit (Chapter 15)
 
 Comprehensive pass over the full design: threat model (7 actors),
-back-door check (4 inbound surfaces, 6-row egress ledger in
+back-door check (4 inbound surfaces, the egress ledger in
 `docs/egress-ledger.yaml`), 13-finding dossier (S1-S13; 7 absorbed from
 the external audit brief, 6 new). Remediation is phased: Phase 1 day-one
 baseline (under half a day, folded into PR 0-2, see
@@ -69,7 +69,8 @@ Flake converged and locked (PR 9 + amend): all inputs pinned to 40-hex
 revs, guard tests live, CI eval job green, build proven on the Mac.
 Switch is the operator's convergence event. Parked, with owners:
 - launchd services (llama-swap, sync-models) -> inference phase,
-  roadmap PR 3 (Linux-ism paths to be resolved there).
+  roadmap PR 3 (llama-swap; sync-models + its launchd timer slipped
+  to roadmap PR 4, Linux-ism paths resolved there).
 - homebrew.enable + orbstack cask -> deferred, see
   `docs/adr/0004-homebrew-primaryuser-deferral.md` (primaryUser/PII
   ruling pending; no username committed).
@@ -106,11 +107,15 @@ done for this tier**, SR-02 remains with PR 5 (WebUI).
 docs/inference.md):** the sops/proxy.golang.org blocker did NOT
 reproduce - the full closure builds (finding 1 RESOLVED). New
 rulings: llama-swap assets drop the `v` from filenames (404 fix
-pending push), flat tarball needs `sourceRoot = "."`, activation is
+carried by PR 20), flat tarball needs `sourceRoot = "."`, activation is
 root-only with the hard Determinate check (`nix.enable = false`,
 ADR-0005), and the `/run` firmlink is a boot-time prerequisite. PR 19
-(open) carries the generator-exec fix (`python3` prefix) and the
-KeepAlive ruling (`SuccessfulExit = false`). Idempotency gap to close
-in code: `scripts/bootstrap.sh` converge still switches without sudo
+(open as of 2026-11-11) carries the generator-exec fix (`python3`
+prefix) and the KeepAlive ruling (`SuccessfulExit = false`);
+`nix.enable = false`, the URL fix and `sourceRoot` ride PR 20
+(stacked on 19, CI green). Idempotency gap to close in code:
+`scripts/bootstrap.sh` converge still switches without sudo
 (see docs/bootstrap.md). Switch pending: operator, after PR 19 and
-the pending fix PRs land.
+PR 20 land - then the dry-gate rebuild, the `/run` verify (reboot if
+`ls /run` is empty), the root switch, and the smoke contract
+(docs/inference.md).

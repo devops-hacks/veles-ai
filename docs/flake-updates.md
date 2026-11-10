@@ -29,7 +29,9 @@ How `nix/flake.lock` moves. The lock is the system's version pin
    branch for urgent cases).
 2. Re-run the switch with the restored lock. Generations remain
    available as a second belt:
-   `sudo "$(command -v nix)" run nix-darwin -- switch --rollback`.
+   `sudo "$(command -v nix)" run nix-darwin -- --rollback`
+   (`--rollback` is a standalone darwin-rebuild action, not a `switch`
+   option).
 
 ## Constraints
 
