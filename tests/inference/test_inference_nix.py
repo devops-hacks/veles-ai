@@ -51,7 +51,9 @@ def test_services_run_as_service_account():
 
 
 def test_binary_pinned_no_floating_refs():
-    assert re.search(r'LLAMA_SWAP_VERSION\s*=\s*"v\d+"', MODULE_TEXT)
+    # bare number: the v prefix lives in the URL path segment, not the
+    # constant (the v268 filename form 404s - release assets are unversioned)
+    assert re.search(r'LLAMA_SWAP_VERSION\s*=\s*"\d+"', MODULE_TEXT)
     # SRI form (sha256-<base64>) - what fetchurl consumes and the release
     # asset API publishes; bootstrap.sh keeps the same content-pin discipline
     assert re.search(r'LLAMA_SWAP_SHA256\s*=\s*"sha256-[A-Za-z0-9+/=]{40,}"', MODULE_TEXT)

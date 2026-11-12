@@ -18,6 +18,8 @@
         sops-nix.darwinModules.sops
         ./inference.nix
         ({ pkgs, config, ... }: {
+          nix.enable = false;
+
           nixpkgs.hostPlatform = "aarch64-darwin";
 
           networking.hostName = "mac-ai";
