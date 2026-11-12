@@ -2,7 +2,7 @@
 # scripts/bootstrap.sh - reproducible bring-up: bare arm64 macOS -> converged darwin config (1b-ii)
 #
 # Usage:
-#   scripts/bootstrap.sh           # apply mode: install, converge, verify
+#   scripts/bootstrap.sh           # apply mode: install, converge (sudo prompt expected), verify
 #   scripts/bootstrap.sh --check   # verify-only: no mutation, no downloads
 #
 # Trust anchor for the Nix installer:
@@ -103,10 +103,36 @@ if [[ "$MODE" == "apply" ]] && [[ -n "$(git -C "$REPO_ROOT" status --porcelain)"
 fi
 log "repo: $REPO_ROOT at ${HEAD_REV:0:7} matches origin/main"
 
+# ---- step c2: /run firmlink standing gate (boot-time prerequisite; findings 7-8) ----
+# nix-darwin 26.11 materializes the system profile under /run, so /run must exist
+# as the synthetic firmlink run -> private/var/run (TAB-separated synthetic.conf).
+# The repair is a BOOT-TIME OPERATOR ACT - this script only verifies; it never
+# writes /etc/synthetic.conf and never reboots.
+if [[ ! -f /etc/synthetic.conf ]] \
+   || ! grep -qxF 'nix' /etc/synthetic.conf \
+   || ! grep -qF $'run\tprivate/var/run' /etc/synthetic.conf \
+   || [[ -z "$(ls -A /run 2>/dev/null)" ]]; then
+  die "run-firmlink: /run is not the synthetic firmlink run -> private/var/run (findings 7-8, docs/inference.md).
+  Boot-time operator repair (never scripted; the printf rewrites the whole file - re-add any other entries):
+    printf 'nix\nrun\tprivate/var/run\n' | sudo tee /etc/synthetic.conf
+    sudo reboot"
+fi
+log "run-firmlink: synthetic.conf carries nix + run->private/var/run; /run non-empty"
+
 # ---- step d: converge (the proven 1b-i command; NEVER update the lock here) ----
 if [[ "$MODE" == "apply" ]]; then
   log "converge: darwin switch for .#${HOST_FLAKE_REF} (reviewed lock only - this script never runs flake update)"
-  nix run nix-darwin -- switch --flake "${REPO_ROOT}/nix#${HOST_FLAKE_REF}"
+  # dry gate first - no switch on a broken eval (README GitOps loop: dry build before every switch)
+  nix run nix-darwin -- build --flake "${REPO_ROOT}/nix#${HOST_FLAKE_REF}"
+  log "converge: dry build gate passed"
+  NIX_BIN="$(command -v nix)"
+  if [[ "${EUID}" -eq 0 ]]; then
+    log "converge: running as root - switching directly"
+    "$NIX_BIN" run nix-darwin -- switch --flake "${REPO_ROOT}/nix#${HOST_FLAKE_REF}"
+  else
+    log "converge: root-only activation on nix-darwin 26.11 (ADR-0005) - sudo prompt expected"
+    sudo "$NIX_BIN" run nix-darwin -- switch --flake "${REPO_ROOT}/nix#${HOST_FLAKE_REF}"
+  fi
   log "converge: switch complete"
 else
   nix flake check --no-build "${REPO_ROOT}/nix"
@@ -116,7 +142,8 @@ fi
 # ---- step e: identity (operator-handled; verify + instruct, never act) ----
 OUTSTANDING=0
 
-if grep -Eq '^[^#]*sops\.secrets\.' "${REPO_ROOT}/nix/flake.nix"; then
+if { [[ -f "${REPO_ROOT}/nix/flake.nix" ]] && grep -Eq '^[^#]*sops\.secrets\.' "${REPO_ROOT}/nix/flake.nix"; } \
+   || { [[ -f "${REPO_ROOT}/nix/inference.nix" ]] && grep -Eq '^[^#]*sops\.secrets\.' "${REPO_ROOT}/nix/inference.nix"; }; then
   if [[ -f "$AGE_KEY_PATH" ]]; then
     log "identity: age key present at the configured path"
   else

@@ -30,18 +30,18 @@ Idempotent and safe to re-run; every step detects existing state first.
    2026-11-11); converge only from a checkout that includes it (main
    once PR 20 merges), or the switch aborts with "Determinate
    detected" - and `/etc/synthetic.conf` must carry the `/run`
-   firmlink (verified below). KNOWN GAP (2026-11-11): the script's converge step still
-   runs the switch WITHOUT sudo - until a reviewed code PR lands it,
-   run the switch by hand with the command above. The lock is
+   firmlink (verified below). RESOLVED (2026-11-13): the script runs
+   the dry `build` gate first, then the root-only switch with the
+   sudo prompt (the by-hand command above remains documented for
+   ADR-0005 context). The lock is
    sacred: the script NEVER runs `nix flake update`.
 5. **Identity** - operator-handled, never scripted: if `sops.secrets`
    are defined, verify the age key exists and print placement
    instructions; check Tailscale presence and print join instructions.
    The script never creates, moves, decrypts keys, or authenticates.
-   KNOWN GAP (2026-11-11): the script's age-key check still greps
-   `nix/flake.nix` only and misses `nix/inference.nix`, where PR 3
-   moved the `sops.secrets` - verify the age key by hand until the
-   same code PR as the sudo converge fixes the grep path.
+   RESOLVED (2026-11-13): the age-key check covers both
+   `nix/flake.nix` and `nix/inference.nix` (where PR 3 moved the
+   `sops.secrets`).
 
 ## Trust anchor (installer)
 
@@ -57,9 +57,10 @@ Idempotent and safe to re-run; every step detects existing state first.
 
 nix-darwin 26.11 activation requires `/run` as the synthetic firmlink
 `run -> private/var/run` (findings 7-8, docs/inference.md). The
-OPERATOR verifies this on every bring-up - the script does not check
-it yet (same gap class as the sudo converge above); treat an absent
-firmlink as a failed bring-up. The repair is a boot-time operator act,
+verified by the script itself in BOTH modes (step c2) since
+2026-11-13: a missing entry or an empty `/run` fails the run with the
+boot-time repair printed in the error. Treat an absent firmlink as a
+failed bring-up. The repair is a boot-time operator act,
 never a scripted mutation:
 
 ```bash

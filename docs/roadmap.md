@@ -113,9 +113,10 @@ ADR-0005), and the `/run` firmlink is a boot-time prerequisite. PR 19
 (open as of 2026-11-11) carries the generator-exec fix (`python3`
 prefix) and the KeepAlive ruling (`SuccessfulExit = false`);
 `nix.enable = false`, the URL fix and `sourceRoot` ride PR 20
-(stacked on 19, CI green). Idempotency gap to close in code:
-`scripts/bootstrap.sh` converge still switches without sudo
-(see docs/bootstrap.md). Switch pending: operator, after PR 19 and
+(stacked on 19, CI green). Idempotency gap CLOSED (2026-11-13):
+`scripts/bootstrap.sh` converge now runs the dry build gate then the
+root-only switch with sudo (see docs/bootstrap.md).
+Switch pending: operator, after PR 19 and
 PR 20 land - then the dry-gate rebuild, the `/run` verify (reboot if
 `ls /run` is empty), the root switch, and the smoke contract
 (docs/inference.md).
