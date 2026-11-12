@@ -67,24 +67,23 @@ Ties into `docs/roadmap.md` (feature gate G1–G6), `docs/security.md`
 - Exempt from unit tests: declarative config (nix, compose, YAML) —
   verified by the lint/validation gates instead of unit tests.
 
-## 5. CI today, CI after PR 1
+## 5. CI
 
 | Job | Runs | Gate |
 |---|---|---|
 | `lint` | `pre-commit run --all-files` | ruff, format, shellcheck, yamllint, gitleaks, private-key detect |
 | `test` | `pytest --cov=services --cov-fail-under=85` | a red PR is a red CI |
 | `test` (conditional) | `bats tests/` | activates when the first `.bats` spec lands |
+| `config` | `docker compose config -q` on `services/compose/memory.yml` + `gateway.yml` | images pinned by digest; no missing build contexts |
+| `nix` | `nix eval --raw ./nix#darwinConfigurations.mac-ai.system.drvPath` (ubuntu) | strict eval: forces full option evaluation of the darwin config |
 
 Deliberately **not** in CI yet:
 
-- `docker compose -f services/compose/*.yml config -q` — add in PR 1 once
-  images carry real pinned digests (the `<pinned-digest>` placeholders
-  would fail validation today);
-- `nix flake check` — add after PR 1 (eval-only on ubuntu runners; the
-  darwin activation stays a local
-  `nix run nix-darwin -- build --flake ./nix#mac-ai` dry-gate per
-  README, run from the repo root - the switch itself is root-only,
-  ADR-0005).
+- `nix flake check --no-build ./nix` — candidate hardening post-MVP;
+  the strict eval above already forces full option evaluation;
+- the darwin build dry-gate itself — stays a local, root-only act
+  (`nix run nix-darwin -- build --flake ./nix#mac-ai` from the repo
+  root) per ADR-0005.
 
 ## 6. Coverage policy
 

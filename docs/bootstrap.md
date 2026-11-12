@@ -26,9 +26,9 @@ Idempotent and safe to re-run; every step detects existing state first.
    26.11: `sudo "$(command -v nix)" run nix-darwin -- switch --flake
    <repo>/nix#mac-ai`. Standing prerequisites (findings 4-8 in
    docs/inference.md): the flake module must carry
-   `nix.enable = false;` (ADR-0005) - carried by PR 20 (open as of
-   2026-11-11); converge only from a checkout that includes it (main
-   once PR 20 merges), or the switch aborts with "Determinate
+   `nix.enable = false;` (ADR-0005) - carried by PR 20 (merged
+   2026-11-11, on main); converge only from a checkout that includes
+   it, or the switch aborts with "Determinate
    detected" - and `/etc/synthetic.conf` must carry the `/run`
    firmlink (verified below). RESOLVED (2026-11-13): the script runs
    the dry `build` gate first, then the root-only switch with the
