@@ -42,10 +42,12 @@ at `nix/flake.nix`.
 - Alternative rejected: migrating off Determinate to the standard
   installer to regain `nix.*` - churn (uninstall, reboot, reinstall)
   with no offsetting benefit.
-- Once PR 20 (`nix.enable = false;`, open as of 2026-11-11) and the
-  bootstrap.sh converge PR (sudo + `/run` check - the KNOWN GAP in
-  docs/bootstrap.md) land, bootstrap.sh and the flake are mutually
-  consistent and a fresh bootstrap converges in one pass. Until then
-  a fresh bootstrap needs the operator's hand for the switch.
+- LANDED (2026-11-13): PR 20 carried `nix.enable = false;` and the
+  bootstrap.sh converge PR closed the documented gap in docs/bootstrap.md
+  (root-only switch with dry gate, `/run` firmlink gate, both-module
+  age-key check). bootstrap.sh and the flake are mutually consistent
+  and a fresh bootstrap converges in one pass; operator acts remaining
+  are tier-0 identity and the boot-time `/run` repair if the gate
+  fires.
 - Related standing prerequisite, same rebuild: the `/run` firmlink
   (findings 7-8, docs/inference.md).
