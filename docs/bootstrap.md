@@ -22,13 +22,26 @@ Idempotent and safe to re-run; every step detects existing state first.
    the script, run it.
 3. **Repo** - locate the checkout (or clone from the canonical URL);
    HEAD must match `origin/main`; apply mode also requires a clean tree.
-4. **Converge** - the proven 1b-i command:
-   `nix run nix-darwin -- switch --flake <repo>/nix#mac-ai`.
-   The lock is sacred: the script NEVER runs `nix flake update`.
+4. **Converge** - the proven 1b-i command, root-only on nix-darwin
+   26.11: `sudo "$(command -v nix)" run nix-darwin -- switch --flake
+   <repo>/nix#mac-ai`. Standing prerequisites (findings 4-8 in
+   docs/inference.md): the flake module must carry
+   `nix.enable = false;` (ADR-0005) - carried by PR 20 (open as of
+   2026-11-11); converge only from a checkout that includes it (main
+   once PR 20 merges), or the switch aborts with "Determinate
+   detected" - and `/etc/synthetic.conf` must carry the `/run`
+   firmlink (verified below). KNOWN GAP (2026-11-11): the script's converge step still
+   runs the switch WITHOUT sudo - until a reviewed code PR lands it,
+   run the switch by hand with the command above. The lock is
+   sacred: the script NEVER runs `nix flake update`.
 5. **Identity** - operator-handled, never scripted: if `sops.secrets`
    are defined, verify the age key exists and print placement
    instructions; check Tailscale presence and print join instructions.
    The script never creates, moves, decrypts keys, or authenticates.
+   KNOWN GAP (2026-11-11): the script's age-key check still greps
+   `nix/flake.nix` only and misses `nix/inference.nix`, where PR 3
+   moved the `sops.secrets` - verify the age key by hand until the
+   same code PR as the sudo converge fixes the grep path.
 
 ## Trust anchor (installer)
 
@@ -39,6 +52,31 @@ Idempotent and safe to re-run; every step detects existing state first.
 - Upstream publishes no per-version checksums file for release assets;
   the in-repo hash is the verification. Changing either constant is a
   reviewed PR.
+
+## /run firmlink prerequisite (verify; repair is boot-time)
+
+nix-darwin 26.11 activation requires `/run` as the synthetic firmlink
+`run -> private/var/run` (findings 7-8, docs/inference.md). The
+OPERATOR verifies this on every bring-up - the script does not check
+it yet (same gap class as the sudo converge above); treat an absent
+firmlink as a failed bring-up. The repair is a boot-time operator act,
+never a scripted mutation:
+
+```bash
+sudo cat -et /etc/synthetic.conf   # expect: nix$ and run^Iprivate/var/run$
+ls /run                            # non-empty (contents of /var/run)
+```
+
+Absent or bare (`run` with no target)? Fix once, then reboot - boot
+rebuilds `/run` from synthetic.conf; there is no runtime repair:
+
+```bash
+printf 'nix\nrun\tprivate/var/run\n' | sudo tee /etc/synthetic.conf
+sudo reboot
+```
+
+That printf rewrites the whole file - the `nix` store entry is
+preserved in it; re-add any other entries synthetic.conf carried.
 
 ## Standing bring-up gates
 

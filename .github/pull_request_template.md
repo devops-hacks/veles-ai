@@ -10,7 +10,9 @@
 - [ ] `pre-commit run --all-files` clean
 - [ ] No secrets/keys in the diff (gitleaks green) — sops ciphertext only
 - [ ] New outbound traffic? Row added to `docs/egress-ledger.yaml` BEFORE merge (A4)
-- [ ] compose/nix touched? `darwin-rebuild build` (dry) ran on the Mac
+- [ ] compose/nix touched? `nix run nix-darwin -- build --flake ./nix#mac-ai`
+      (dry) ran on the Mac (the switch itself is root-only on
+      nix-darwin 26.11 - ADR-0005)
 - [ ] Docs updated (README / docs/) when setup or behavior changed
 
 ## Security & privacy (Ch. 15 lens)
