@@ -76,3 +76,9 @@ def test_module_declares_no_users_entries():
     """
     for declaration in ("users.users", "users.knownUsers", "users.groups"):
         assert declaration not in MODULE_TEXT, declaration
+
+
+def test_no_commented_out_fetchurl_blocks():
+    assert not re.search(
+        r"^\s*#\s*src\s*=\s*fetchurl", MODULE_TEXT, re.M
+    ), "commented-out fetchurl block is dead code; delete it, do not comment fixes out"

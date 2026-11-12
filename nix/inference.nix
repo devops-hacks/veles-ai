@@ -40,10 +40,6 @@ let
       sha256 = LLAMA_SWAP_SHA256;
     };
     sourceRoot = ".";
-#src = fetchurl {
-#  url = "https://github.com/mostlygeek/llama-swap/releases/download/v268/llama-swap_268_darwin_arm64.tar.gz";
-#  sha256 = "sha256-NzobtQFBgORKkaXnp6ok8boYtd/ZYid596ojS9M+7IY=";
-#};
     # source tarball carries the prebuilt darwin-arm64 binary at top level
     installPhase = ''
       install -Dm755 llama-swap $out/bin/llama-swap
