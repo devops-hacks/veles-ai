@@ -110,3 +110,13 @@ def test_age_key_check_covers_all_nix_modules():
     sops_grep_lines = [ln for ln in text.splitlines() if "sops" in ln and "secrets" in ln]
     assert any("nix/flake.nix" in ln for ln in sops_grep_lines)
     assert any("nix/inference.nix" in ln for ln in sops_grep_lines)
+
+
+def test_tailscale_hint_names_formula_not_cask():
+    """2026-11-12 ruling: server hosts need the formula's boot-time
+    LaunchDaemon (ADR-0003); the cask token was renamed upstream and the
+    GUI app has no pre-login tunnel."""
+    text = SCRIPT.read_text()
+    assert "--cask tailscale" not in text
+    assert "brew install tailscale" in text
+    assert "--accept-dns=false" in text
