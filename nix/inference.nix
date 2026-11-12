@@ -51,7 +51,7 @@ let
       nativeBuildInputs = [ pkgs.python3 ];
     }
     ''
-      ${../scripts/generate_swap_config.py} \
+      python3 ${../scripts/generate_swap_config.py} \
         --manifest ${../models/models.toml} \
         --llama-server ${pkgs.llama-cpp}/bin/llama-server \
         --models-root ${MODELS_ROOT} \
@@ -114,7 +114,7 @@ in
     command = "${llamaSwapLauncher}";
     serviceConfig = {
       UserName = "_veles";
-      KeepAlive = true;
+      KeepAlive.SuccessfulExit = false;
       RunAtLoad = true;
     };
   };
@@ -123,7 +123,7 @@ in
     command = "${llamaAutocompleteLauncher}";
     serviceConfig = {
       UserName = "_veles";
-      KeepAlive = true;
+      KeepAlive.SuccessfulExit = false;
       RunAtLoad = true;
     };
   };
