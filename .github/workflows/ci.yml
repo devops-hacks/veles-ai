@@ -1,6 +1,5 @@
 # CI gates: lint + test + compose config. Authored to match
-# docs/pr-tdd-playbook.md section 5. The nix-eval gate lands in the
-# next PR (flake convergence).
+# docs/pr-tdd-playbook.md section 5.
 name: ci
 
 on:

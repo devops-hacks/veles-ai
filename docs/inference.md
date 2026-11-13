@@ -86,7 +86,7 @@ no models to load.
    derivation; the binary then sits at `./llama-swap` for the
    installPhase.
 
-6. **KeepAlive semantics (PR 19, open as of 2026-11-11).**
+6. **KeepAlive semantics (PR 19, merged 2026-11-11).**
    `KeepAlive = true` restarts a job
    on EVERY exit, so the autocomplete daemon's intentional clean
    exit-0 (model absent until PR 4) became an exit-loop. Ruling

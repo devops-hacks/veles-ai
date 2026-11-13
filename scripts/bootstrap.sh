@@ -165,8 +165,9 @@ if command -v tailscale >/dev/null 2>&1; then
   log "identity: tailscale present (join/auth status is operator-verified)"
 else
   log "identity: WARNING tailscale absent - install + join is an operator action:"
-  echo "    install the Tailscale app (or: brew install --cask tailscale), sign in, then:"
-  echo "    tailscale up   # then verify ACL reachability per docs/security.md"
+  echo "    brew install tailscale && sudo brew services start tailscale  # formula: boot-time LaunchDaemon (ADR-0003)"
+  echo "    sudo tailscale up --accept-dns=false  # protects the declared LAN resolver; add --advertise-tags=tag:admin if the tailnet requires server tags"
+  echo "    # then verify ACL reachability per docs/security.md; never run the formula and the GUI app (cask) on one host"
   OUTSTANDING=1
 fi
 
