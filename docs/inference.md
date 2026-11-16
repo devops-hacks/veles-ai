@@ -213,3 +213,13 @@ preserved in it; re-add any other entries synthetic.conf carried.
 
 The escape-hatch paragraph above predates finding 8: the
 synthetic.conf entry is now load-bearing, not hypothetical.
+
+9. **Model-volume ownership: activation ran before the mount
+   (2026-11-16, PR 4).** The activation chown to `_veles:_veles` was
+   declared but never materialized; Gate G-1 shows the volume mounts
+   with `Owners: enabled`, so the silent swallow (`|| true`) hid a real
+   failure - at switch time the volume path predates the mount or the
+   chown was refused. The activation script now fails LOUD (grep-able
+   `MARKER-A2`) without bricking the switch; the volume-tolerant else
+   branch (services stay up) is unchanged. Runbook: re-run the switch
+   with the volume mounted; the chown materializes.

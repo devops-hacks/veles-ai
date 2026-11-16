@@ -158,7 +158,13 @@ in
     enable = true;
     text = ''
       if [ -d "${MODELS_ROOT}" ]; then
-        /usr/sbin/chown -R _veles:_veles "${MODELS_ROOT}" || true
+        if /usr/sbin/chown -R _veles:_veles "${MODELS_ROOT}"; then
+          echo "veles: model volume ownership verified (_veles:_veles)"
+        else
+          echo "veles: MARKER-A2 CHOWN FAILED for ${MODELS_ROOT}"
+          echo "veles: root cause + runbook: docs/inference.md finding 9"
+          echo "veles: services stay up; sync-models stays down until fixed"
+        fi
       else
         echo "veles: ${MODELS_ROOT} absent - prepare the volume (operator step); services stay up without models"
       fi

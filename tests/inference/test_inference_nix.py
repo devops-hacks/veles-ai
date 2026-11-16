@@ -111,3 +111,15 @@ def test_router_log_redirection_stays_phase2():
         assert m, f"daemon {name} missing"
         assert "StandardOutPath" not in m.group(1), name
         assert "StandardErrorPath" not in m.group(1), name
+
+
+def test_activation_chown_fails_loud_not_silent():
+    m = re.search(
+        r"system\.activationScripts\.llamaModelsVolume\s*=\s*\{(.*?)\n  \};",
+        MODULE_TEXT,
+        re.DOTALL,
+    )
+    assert m, "llamaModelsVolume activation missing"
+    block = m.group(1)
+    assert "|| true" not in block, "silent chown failure is the anomaly-2 regression"
+    assert "MARKER-A2" in block, "chown failure must emit the loud marker"
