@@ -18,7 +18,7 @@ egress:
     revoke: local-CA fallback (A6)
   - name: model-sync               # nightly HF pulls, pinned repo+rev+sha256
     hosts:
-      - huggingface.co             # https/443 - models/models.toml repo ids; scripts/sync-models.sh `hf download`
+      - huggingface.co             # https/443 - models.toml pins; sync-models.sh curl resolve URLs
     sees: public model files
     revoke: stop the timer; resident models keep serving
   - name: image-registries         # compose pull, digest-pinned images
