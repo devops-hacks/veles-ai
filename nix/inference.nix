@@ -79,6 +79,14 @@ let
     # shellcheck disable=SC2046 - the cmd file is a command line by contract
     exec $(cat ${swapConfig}/isolated-qwen2.5-coder-1.5b.cmd) --api-key "$KEY"
   '';
+  # sync-models timer launcher: python comes from nix (no CLT dependency
+  # in the system-daemon context); manifest + root are store-pinned.
+  syncModelsLauncher = pkgs.writeShellScript "sync-models-launcher" ''
+    export SYNC_PYTHON="${pkgs.python3}/bin/python3"
+    export MODELS_ROOT="${MODELS_ROOT}"
+    export MANIFEST="${../models/models.toml}"
+    exec ${../scripts/sync-models.sh}
+  '';
 in
 {
   # ---- hidden service account: project-named, never a person (PII ruling) ----
@@ -129,6 +137,22 @@ in
     };
   };
 
+  # ---- sync-models: batch download/verify timer (roadmap PR 4) ----
+  # Batch job: no RunAtLoad, no KeepAlive (failure = loud .err, no loop).
+  # Its logs land in /var/log/veles (activation pre-creates + pre-owns
+  # them); ROUTER stdout redirection stays a Phase 2 item
+  # (docs/inference.md, "Logs and Metal verification").
+  launchd.daemons.sync-models = {
+    command = "${syncModelsLauncher}";
+    serviceConfig = {
+      UserName = "_veles";
+      RunAtLoad = false;
+      StartCalendarInterval = { Hour = 4; Minute = 30; };
+      StandardOutPath = "/var/log/veles/sync-models.out";
+      StandardErrorPath = "/var/log/veles/sync-models.err";
+    };
+  };
+
   # ---- activation: model volume ownership (operator prepares the volume) ----
   system.activationScripts.llamaModelsVolume = {
     enable = true;
@@ -138,6 +162,21 @@ in
       else
         echo "veles: ${MODELS_ROOT} absent - prepare the volume (operator step); services stay up without models"
       fi
+    '';
+  };
+
+  # sync-models log home: launchd truncates/creates the files itself but
+  # not the directory; pre-create + pre-own so the _veles job can write
+  # its evidence there.
+  system.activationScripts.velesLogDir = {
+    enable = true;
+    text = ''
+      /bin/mkdir -p /var/log/veles
+      /bin/chmod 0755 /var/log/veles
+      /usr/sbin/chown root:admin /var/log/veles
+      /usr/bin/touch /var/log/veles/sync-models.out /var/log/veles/sync-models.err
+      /usr/sbin/chown _veles:_veles /var/log/veles/sync-models.out /var/log/veles/sync-models.err
+      /bin/chmod 0644 /var/log/veles/sync-models.out /var/log/veles/sync-models.err
     '';
   };
 }

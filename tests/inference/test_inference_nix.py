@@ -47,7 +47,8 @@ def test_three_sops_secrets_owner_and_mode():
 
 
 def test_services_run_as_service_account():
-    assert MODULE_TEXT.count('UserName = "_veles";') == 2
+    # llama-swap + llama-autocomplete + sync-models (PR 4 timer)
+    assert MODULE_TEXT.count('UserName = "_veles";') == 3
 
 
 def test_binary_pinned_no_floating_refs():
@@ -82,3 +83,31 @@ def test_no_commented_out_fetchurl_blocks():
     assert not re.search(
         r"^\s*#\s*src\s*=\s*fetchurl", MODULE_TEXT, re.M
     ), "commented-out fetchurl block is dead code; delete it, do not comment fixes out"
+
+
+def test_sync_timer_is_scheduled_batch_not_boot_job():
+    m = re.search(
+        r"launchd\.daemons\.sync-models\s*=\s*\{(.*?)\n  \};",
+        MODULE_TEXT,
+        re.DOTALL,
+    )
+    assert m, "sync-models daemon missing"
+    block = m.group(1)
+    assert 'UserName = "_veles";' in block
+    assert "RunAtLoad = false;" in block, "first fill is operator-kickstarted"
+    assert "StartCalendarInterval" in block
+    assert 'StandardErrorPath = "/var/log/veles/sync-models.err";' in block
+
+
+def test_router_log_redirection_stays_phase2():
+    # recorded ruling: router /var/log redirection is Phase 2 -
+    # PR 4 redirects ONLY the sync timer's logs
+    for name in ("llama-swap", "llama-autocomplete"):
+        m = re.search(
+            r"launchd\.daemons\." + name + r"\s*=\s*\{(.*?)\n  \};",
+            MODULE_TEXT,
+            re.DOTALL,
+        )
+        assert m, f"daemon {name} missing"
+        assert "StandardOutPath" not in m.group(1), name
+        assert "StandardErrorPath" not in m.group(1), name
