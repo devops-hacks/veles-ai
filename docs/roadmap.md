@@ -89,7 +89,7 @@ Mac post-merge and files the output for the record.
 - **SR-02** WebUI first-admin + closed signups;
 - **SR-03** loopback-only binds except the TLS terminator.
 
-## Delivery status - PR 3 (inference core): LANDED, switch pending
+## Delivery status - PR 3 (inference core): LANDED, switch EXECUTED (2026-11-13)
 
 llama-swap (pinned v268, content-hashed) as a system LaunchDaemon on
 127.0.0.1:4002 with A1 keys sops-managed; isolated 1.5B autocomplete
@@ -99,9 +99,11 @@ guards enforce loopback binds, the service account, pins, and the
 primaryUser trap. Two build findings escalated (see
 docs/inference.md): proxy.golang.org egress for the sops-nix darwin
 build, and a UserName launchd<->users recursion at the pinned
-nix-darwin revs. Bring-up gates: **SR-01 done in code** (keys at the
-choke point, loopback binds; operator smoke pending switch), **SR-03
-done for this tier**, SR-02 remains with PR 5 (WebUI).
+nix-darwin revs. Bring-up gates: **SR-01 done in code and proven on
+the wire** (keys at the choke point, loopback binds; operator smoke
+landed 2026-11-13: 401 without key, 200 with key), **SR-03 done for
+this tier and verified** (single 127.0.0.1 listener as the service
+account), SR-02 remains with PR 5 (WebUI).
 
 **Update 2026-11-11 (dry-gate rebuild, findings 4-8 in
 docs/inference.md):** the sops/proxy.golang.org blocker did NOT
@@ -116,7 +118,13 @@ prefix) and the KeepAlive ruling (`SuccessfulExit = false`);
 (merged 2026-11-11). Idempotency gap CLOSED (2026-11-13):
 `scripts/bootstrap.sh` converge now runs the dry build gate then the
 root-only switch with sudo (see docs/bootstrap.md).
-Switch pending: operator - now that PR 19 and
-PR 20 have landed: the dry-gate rebuild, the `/run` verify (reboot if
-`ls /run` is empty), the root switch, and the smoke contract
-(docs/inference.md).
+Switch EXECUTED (2026-11-13, operator, scripts/bootstrap.sh apply
+mode at 74e54dd): the dry gate passed with zero builds (closure
+bit-identical), the root-only sudo switch converged first try
+(ADR-0005), the sops secrets materialized on first activation, and
+the smoke contract is green - 4002/health OK unauthenticated, 401
+without key, 200 with key, one loopback listener as _veles; 4003
+refused with the gguf volume still empty (the stay-down contract
+held: exit 0, no crash loop). Remaining for this tier: PR 4 model
+sync (volume empty; the activation chown to _veles did not
+materialize - the fix rides PR 4), then PR 5 (WebUI).

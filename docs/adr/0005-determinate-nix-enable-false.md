@@ -49,5 +49,10 @@ at `nix/flake.nix`.
   and a fresh bootstrap converges in one pass; operator acts remaining
   are tier-0 identity and the boot-time `/run` repair if the gate
   fires.
+- EXECUTED (2026-11-13): the first live root-only switch ran via
+  scripts/bootstrap.sh apply mode at 74e54dd - dry gate passed with
+  zero builds, the sudo-prompt path converged first try, and the
+  sops secrets materialized on first activation. The ruling now has
+  its first on-host proof.
 - Related standing prerequisite, same rebuild: the `/run` firmlink
   (findings 7-8, docs/inference.md).
