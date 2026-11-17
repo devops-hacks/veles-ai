@@ -154,35 +154,27 @@ in
   };
 
   # ---- activation: model volume ownership (operator prepares the volume) ----
-  system.activationScripts.llamaModelsVolume = {
+  # ---- veles-ownership: root-context, NON-FATAL (a failed chown must
+  # never abort a switch; failures are loud via grep-able MARKER-A2).
+  # Dir-only chown - the gguf dir is empty and daemon-created files
+  # inherit _veles:_veles; the volume root is intentionally untouched.
+  # Idempotent: later switches no-op the chown and re-print the success
+  # line ("ownership verified" is the runbook grep contract).
+  system.activationScripts.veles-ownership = {
     enable = true;
     text = ''
-      if [ -d "${MODELS_ROOT}" ]; then
-        if /usr/sbin/chown -R _veles:_veles "${MODELS_ROOT}"; then
-          echo "veles: model volume ownership verified (_veles:_veles)"
+      if [ -d /Volumes/ai-models ]; then
+        if mkdir -p /var/log/veles && chown _veles:_veles /var/log/veles; then :; else
+          printf '[veles-activation] MARKER-A2: /var/log/veles provisioning failed (non-fatal; kick logs will be lost)\n'
+        fi
+        if mkdir -p /Volumes/ai-models/gguf && chown _veles:_veles /Volumes/ai-models/gguf; then
+          printf '[veles-activation] model volume ownership verified (_veles:_veles)\n'
         else
-          echo "veles: MARKER-A2 CHOWN FAILED for ${MODELS_ROOT}"
-          echo "veles: root cause + runbook: docs/inference.md finding 9"
-          echo "veles: services stay up; sync-models stays down until fixed"
+          printf '[veles-activation] MARKER-A2: gguf ownership enforcement failed (non-fatal; sync-models fails loud at kick)\n'
         fi
       else
-        echo "veles: ${MODELS_ROOT} absent - prepare the volume (operator step); services stay up without models"
+        printf '[veles-activation] /Volumes/ai-models absent - stay-down; ownership enforcement skipped\n'
       fi
-    '';
-  };
-
-  # sync-models log home: launchd truncates/creates the files itself but
-  # not the directory; pre-create + pre-own so the _veles job can write
-  # its evidence there.
-  system.activationScripts.velesLogDir = {
-    enable = true;
-    text = ''
-      /bin/mkdir -p /var/log/veles
-      /bin/chmod 0755 /var/log/veles
-      /usr/sbin/chown root:admin /var/log/veles
-      /usr/bin/touch /var/log/veles/sync-models.out /var/log/veles/sync-models.err
-      /usr/sbin/chown _veles:_veles /var/log/veles/sync-models.out /var/log/veles/sync-models.err
-      /bin/chmod 0644 /var/log/veles/sync-models.out /var/log/veles/sync-models.err
     '';
   };
 }
