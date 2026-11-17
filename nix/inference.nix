@@ -154,27 +154,32 @@ in
   };
 
   # ---- activation: model volume ownership (operator prepares the volume) ----
-  # ---- veles-ownership: root-context, NON-FATAL (a failed chown must
-  # never abort a switch; failures are loud via grep-able MARKER-A2).
-  # Dir-only chown - the gguf dir is empty and daemon-created files
-  # inherit _veles:_veles; the volume root is intentionally untouched.
-  # Idempotent: later switches no-op the chown and re-print the success
-  # line ("ownership verified" is the runbook grep contract).
-  system.activationScripts.veles-ownership = {
-    enable = true;
-    text = ''
-      if [ -d /Volumes/ai-models ]; then
-        if mkdir -p /var/log/veles && chown _veles:_veles /var/log/veles; then :; else
-          printf '[veles-activation] MARKER-A2: /var/log/veles provisioning failed (non-fatal; kick logs will be lost)\n'
-        fi
-        if mkdir -p /Volumes/ai-models/gguf && chown _veles:_veles /Volumes/ai-models/gguf; then
-          printf '[veles-activation] model volume ownership verified (_veles:_veles)\n'
-        else
-          printf '[veles-activation] MARKER-A2: gguf ownership enforcement failed (non-fatal; sync-models fails loud at kick)\n'
-        fi
+  # ---- activation: model volume ownership + sync-models log home ----
+  # Contributed to the WIRED nix-darwin chunk name postActivation via
+  # types.lines concatenation. Custom chunk names are dead code in
+  # nix-darwin bb0b90d (activation-scripts.nix interpolates an
+  # enumerated list only) - the PR #27 chunks llamaModelsVolume and
+  # velesLogDir never ran for exactly this reason. Root context,
+  # NON-FATAL: every failure emits grep-able MARKER-A2 and continues;
+  # a failed chown must never abort a switch.
+  system.activationScripts.postActivation.text = ''
+    # sync-models log home (guarded; was the unwired velesLogDir chunk)
+    if mkdir -p /var/log/veles && chmod 0755 /var/log/veles && chown root:admin /var/log/veles \
+       && touch /var/log/veles/sync-models.out /var/log/veles/sync-models.err \
+       && chown _veles:_veles /var/log/veles/sync-models.out /var/log/veles/sync-models.err \
+       && chmod 0644 /var/log/veles/sync-models.out /var/log/veles/sync-models.err
+    then :; else
+      printf 'veles: MARKER-A2 log-dir provisioning failed (non-fatal; kick logs will be lost)\n'
+    fi
+    # model volume ownership (guarded; was the unwired llamaModelsVolume chunk)
+    if [ -d "${MODELS_ROOT}" ]; then
+      if mkdir -p "${MODELS_ROOT}" && chown -R _veles:_veles "${MODELS_ROOT}"; then
+        echo "veles: model volume ownership verified (_veles:_veles)"
       else
-        printf '[veles-activation] /Volumes/ai-models absent - stay-down; ownership enforcement skipped\n'
+        printf 'veles: MARKER-A2 CHOWN FAILED for ${MODELS_ROOT} (non-fatal; sync-models fails loud at kick)\n'
       fi
-    '';
-  };
+    else
+      echo "veles: ${MODELS_ROOT} absent - prepare the volume (operator step); services stay up without models"
+    fi
+  '';
 }
