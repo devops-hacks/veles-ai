@@ -34,6 +34,7 @@ die() { printf '[sync-models] FAIL: %s\n' "$*" >&2; exit 1; }
 
 [ -f "$MANIFEST" ] || die "manifest missing: $MANIFEST"
 [ -d "$MODELS_ROOT" ] || die "MODELS_ROOT absent: $MODELS_ROOT (volume not mounted - stay-down contract applies; fix the mount, re-run)"
+[ -w "$MODELS_ROOT" ] || die "MODELS_ROOT not writable by $(id -un) (expects activation chown; see runbook step 1)"
 
 # manifest -> TSV rows: repo|rev|file|dest|sha256 (stdlib tomllib)
 ROWS="$("$SYNC_PYTHON" - "$MANIFEST" <<'PYEOF'

@@ -154,35 +154,32 @@ in
   };
 
   # ---- activation: model volume ownership (operator prepares the volume) ----
-  system.activationScripts.llamaModelsVolume = {
-    enable = true;
-    text = ''
-      if [ -d "${MODELS_ROOT}" ]; then
-        if /usr/sbin/chown -R _veles:_veles "${MODELS_ROOT}"; then
-          echo "veles: model volume ownership verified (_veles:_veles)"
-        else
-          echo "veles: MARKER-A2 CHOWN FAILED for ${MODELS_ROOT}"
-          echo "veles: root cause + runbook: docs/inference.md finding 9"
-          echo "veles: services stay up; sync-models stays down until fixed"
-        fi
+  # ---- activation: model volume ownership + sync-models log home ----
+  # Contributed to the WIRED nix-darwin chunk name postActivation via
+  # types.lines concatenation. Custom chunk names are dead code in
+  # nix-darwin bb0b90d (activation-scripts.nix interpolates an
+  # enumerated list only) - the PR #27 chunks llamaModelsVolume and
+  # velesLogDir never ran for exactly this reason. Root context,
+  # NON-FATAL: every failure emits grep-able MARKER-A2 and continues;
+  # a failed chown must never abort a switch.
+  system.activationScripts.postActivation.text = ''
+    # sync-models log home (guarded; was the unwired velesLogDir chunk)
+    if mkdir -p /var/log/veles && chmod 0755 /var/log/veles && chown root:admin /var/log/veles \
+       && touch /var/log/veles/sync-models.out /var/log/veles/sync-models.err \
+       && chown _veles:_veles /var/log/veles/sync-models.out /var/log/veles/sync-models.err \
+       && chmod 0644 /var/log/veles/sync-models.out /var/log/veles/sync-models.err
+    then :; else
+      printf 'veles: MARKER-A2 log-dir provisioning failed (non-fatal; kick logs will be lost)\n'
+    fi
+    # model volume ownership (guarded; was the unwired llamaModelsVolume chunk)
+    if [ -d "${MODELS_ROOT}" ]; then
+      if mkdir -p "${MODELS_ROOT}" && chown -R _veles:_veles "${MODELS_ROOT}"; then
+        echo "veles: model volume ownership verified (_veles:_veles)"
       else
-        echo "veles: ${MODELS_ROOT} absent - prepare the volume (operator step); services stay up without models"
+        printf 'veles: MARKER-A2 CHOWN FAILED for ${MODELS_ROOT} (non-fatal; sync-models fails loud at kick)\n'
       fi
-    '';
-  };
-
-  # sync-models log home: launchd truncates/creates the files itself but
-  # not the directory; pre-create + pre-own so the _veles job can write
-  # its evidence there.
-  system.activationScripts.velesLogDir = {
-    enable = true;
-    text = ''
-      /bin/mkdir -p /var/log/veles
-      /bin/chmod 0755 /var/log/veles
-      /usr/sbin/chown root:admin /var/log/veles
-      /usr/bin/touch /var/log/veles/sync-models.out /var/log/veles/sync-models.err
-      /usr/sbin/chown _veles:_veles /var/log/veles/sync-models.out /var/log/veles/sync-models.err
-      /bin/chmod 0644 /var/log/veles/sync-models.out /var/log/veles/sync-models.err
-    '';
-  };
+    else
+      echo "veles: ${MODELS_ROOT} absent - prepare the volume (operator step); services stay up without models"
+    fi
+  '';
 }
