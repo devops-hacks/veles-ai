@@ -1,5 +1,8 @@
 # CI gates: lint + test + compose config. Authored to match
 # docs/pr-tdd-playbook.md section 5.
+# Runner labels are PINNED, never floating aliases: same anti-pattern
+# class as floating action refs - the Ubuntu 26 label migration
+# (actions/runner-images#14748) must be a deliberate ruling.
 name: ci
 
 on:
@@ -13,7 +16,7 @@ permissions:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6, full-SHA pin
         with:
@@ -28,7 +31,7 @@ jobs:
           pre-commit run --all-files
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6, full-SHA pin
         with:
@@ -52,7 +55,7 @@ jobs:
           fi
 
   config:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6, full-SHA pin
         with:
@@ -62,7 +65,7 @@ jobs:
           docker compose -f services/compose/memory.yml -f services/compose/gateway.yml config -q
 
   nix:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       NIX_CONFIG: "access-tokens = github.com=${{ github.token }}"
     steps:
