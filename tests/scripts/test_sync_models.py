@@ -78,3 +78,17 @@ def test_dry_run_prints_pinned_urls(tmp_path):
         "https://huggingface.co/org/repo/resolve/"
         "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/m.gguf" in r.stdout
     ), r.stdout
+
+
+def test_curl_aborts_stalled_transfers():
+    """2026-11-18 evidence: a silently stalled connection sat at 8.0G for
+    hours - --retry does not fire on a stall (no error), so the transfer
+    hung until a manual kickstart -k. --speed-limit/--speed-time turn the
+    stall into a curl error (exit 28), which --retry treats as transient:
+    self-abort, auto-resume via -C -, die loud only after retries exhaust."""
+    text = SCRIPT.read_text()
+    line = next(ln for ln in text.splitlines() if ln.lstrip().startswith("curl "))
+    assert line.strip() == (
+        "curl -fL -C - --retry 3 --retry-delay 5 "
+        '--speed-limit 1024 --speed-time 60 -o "$tmp" "$url" \\'
+    ), f"curl invocation drifted: {line.strip()!r}"
