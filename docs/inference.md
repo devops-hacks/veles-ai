@@ -163,6 +163,35 @@ sudo launchctl bootstrap system /run/current-system...   # rarely needed; switch
   `curl -s http://127.0.0.1:4003/health` -> OK.
 - SR-01 evidence: keys live at the router (401 without, 200 with) and
   binds are loopback-only (see the source guards).
+- WebUI route (verified 2026-11-20): `curl /ui/` -> **401** without
+  key, **200** with the operator key - the A1 gate covers the router's
+  UI, not just `/v1/*`.
+
+## Serving proof (2026-11-20, scripted, PR 30 post-deploy)
+
+The llama-swap WebUI path was proven end-to-end with scripted,
+pre-declared gates (W1/W2/W2b/W2c) - the same endpoint and key the
+browser session uses, driven non-interactively:
+
+- Catalog: `/v1/models` lists exactly the swap-matrix model
+  `qwen3-coder-30b-a3b` (the isolated 1.5B tier is outside the matrix
+  by design); llama-swap pid 60176 throughout the PR 30 deploy.
+- Completion: `/v1/chat/completions` returned the exact requested
+  phrase (`VELES-WEBUI-PROOF-OK`, finish `stop`) through the swap
+  matrix; artifact `/tmp/w2-completion.json`.
+- Upstream spawn pinned: llama-server pid 95361, store binary
+  `llama-cpp-0.7.0`, `-ngl 99 -fa on -ctk q8_0 -ctv q8_0 -c 131072
+  -np 8 --cont-batching --cache-reuse 256`, upstream port 5800.
+- WebUI: served at `http://127.0.0.1:4002/ui/` (`Location: ui/`
+  redirect); **401 without key, 200 with the operator key** - the A1
+  key gate covers the UI route, not just `/v1/*` (artifact
+  `/tmp/w2c-ui.html`).
+- Idle unload: `globalTTL: 1800` unloads after ~30 min idle
+  (`status: unloaded` in the catalog, no llama-server process); a
+  scripted request re-spawns on demand (1.4 s warm).
+- Known wart (docs-only): the catalog advertises `context_length:
+  16384` while the spawned cmd runs `-c 131072` - two sources of
+  truth; reconcile in the PR 5 window.
 
 ## Logs and Metal verification
 
@@ -223,3 +252,36 @@ synthetic.conf entry is now load-bearing, not hypothetical.
    `MARKER-A2`) without bricking the switch; the volume-tolerant else
    branch (services stay up) is unchanged. Runbook: re-run the switch
    with the volume mounted; the chown materializes.
+
+   **RESOLVED 2026-11-18 (PR 29, commits 46882ca + 5c17cdd).** Root
+   cause: the chown lived in custom activation chunks
+   (`llamaModelsVolume`, `velesLogDir`) that nix-darwin bb0b90d never
+   wires - custom chunk names are dead code (the PR 27 ruling). The
+   cure moved the work into the WIRED `postActivation.text`
+   (types.lines) with a class-closure guard test. Deploy evidence:
+   switch log carries `veles: model volume ownership verified
+   (_veles:_veles)` exactly once, `MARKER-A2` absent, gguf at
+   `_veles:_veles`, `/var/log/veles` provisioned and owned.
+   Re-verified unchanged on the PR 30 switch (2026-11-20).
+
+10. **Silent curl stall - `--retry` cannot see a stall (2026-11-18,
+    cured by PR 30, deployed 2026-11-20).** First full model-sync run
+    (17 GiB qwen3 + 1.8 GiB qwen2.5, ~19 h wall clock): four curl
+    instances for the 30B tier, three loud `FAIL:` lines in .err - and
+    one SILENT stall: the .part sat at 8.0 GiB with a frozen mtime for
+    many minutes, no retry fired (`--retry` retries curl ERRORS; a
+    stalled-but-open TCP connection produces none), recovery required a
+    manual `launchctl kickstart -k`. Resume integrity held throughout
+    (`-C -` preserved the 8.0 GiB across kills; the final files hashed
+    to the manifest pins `fadc3e5f...` / `507de590...`; idempotent
+    re-run printed `OK (cached, hash verified)` twice). Cure (PR 30,
+    one transport line): `--speed-limit 1024 --speed-time 60` - under
+    1 KB/s for 60 s aborts with exit 28, which `--retry` treats as
+    transient: self-abort, auto-resume via `-C -`, die loud only after
+    three in-process retries. A healthy multi-MB/s transfer cannot trip
+    the guard. Guard test pins the curl line byte-for-byte; RED-first
+    evidence in the PR body. Deploy chain on record: system
+    `a1ppylw02qks6bs2hzmglh8f5cdk7r47-darwin-system-26.11.bb0b90d`,
+    launcher `8j5wwh2h...`, inner `qxspxhi3...`; post-switch
+    idempotence kick: cached OK twice, `no orphans`, `done`, zero curl.
+
