@@ -128,3 +128,22 @@ refused with the gguf volume still empty (the stay-down contract
 held: exit 0, no crash loop). Remaining for this tier: PR 4 model
 sync (volume empty; the activation chown to _veles did not
 materialize - the fix rides PR 4), then PR 5 (WebUI).
+
+**Update 2026-11-20 (PR 4 complete, stall guard PR 30 deployed,
+llama-swap UI verified):** model sync SHIPPED and completed
+2026-11-18 - 17 GiB qwen3-coder-30b-a3b + 1.8 GiB
+qwen2.5-coder-1.5b-q8_0 fetched and sha256-verified against the
+manifest pins (`fadc3e5f...`, `507de590...`), idempotent cached path
+proven (`OK (cached, hash verified)` twice, `no orphans`, `done`,
+zero curl). The 2026-11-18 silent-stall incident (8.0 GiB .part,
+frozen mtime, `--retry` blind to stalls) is cured by PR 30's
+transport guard (`--speed-limit 1024 --speed-time 60`, finding 10 in
+docs/inference.md), deployed and converged 2026-11-20 (system
+`a1ppylw0...`, switch clean: ownership line x1, `MARKER-A2` x0,
+llama-swap pid unchanged). The activation-ownership gap noted above
+(anomaly: chown not materializing) was RESOLVED by PR 29
+(2026-11-18, wired postActivation.text; finding 9 closed).
+llama-swap's built-in WebUI is verified serving and auth-gated at
+/ui/ (2026-11-20, scripted proof in docs/inference.md) - this is the
+ROUTER's UI, not SR-02: SR-02 (gateway WebUI, PR 5) remains open.
+
