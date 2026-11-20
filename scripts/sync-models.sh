@@ -71,7 +71,7 @@ fetch_one() {
   tmp="$out.part"
   log "fetch $dest"
   log "  url: $url"
-  curl -fL -C - --retry 3 --retry-delay 5 -o "$tmp" "$url" \
+  curl -fL -C - --retry 3 --retry-delay 5 --speed-limit 1024 --speed-time 60 -o "$tmp" "$url" \
     || die "curl failed for $dest ($url)"
   got="$(shasum -a 256 "$tmp" | awk '{print $1}')"
   if [ "$got" != "$want" ]; then
