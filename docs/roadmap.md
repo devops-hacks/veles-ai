@@ -146,4 +146,3 @@ llama-swap pid unchanged). The activation-ownership gap noted above
 llama-swap's built-in WebUI is verified serving and auth-gated at
 /ui/ (2026-11-20, scripted proof in docs/inference.md) - this is the
 ROUTER's UI, not SR-02: SR-02 (gateway WebUI, PR 5) remains open.
-

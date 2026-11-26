@@ -284,4 +284,3 @@ synthetic.conf entry is now load-bearing, not hypothetical.
     `a1ppylw02qks6bs2hzmglh8f5cdk7r47-darwin-system-26.11.bb0b90d`,
     launcher `8j5wwh2h...`, inner `qxspxhi3...`; post-switch
     idempotence kick: cached OK twice, `no orphans`, `done`, zero curl.
-
